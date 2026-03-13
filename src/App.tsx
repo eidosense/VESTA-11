@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import { 
   collection, 
+  where,
   addDoc, 
   query, 
   orderBy, 
@@ -40,7 +41,14 @@ import {
   Lock,
   Wind,
   MapPin,
-  Volume2
+  Volume2,
+  Settings,
+  User,
+  Check,
+  AlertCircle,
+  UserPlus,
+  Copy,
+  Link
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -61,6 +69,24 @@ interface UserProfile {
   email: string;
   role: 'Commander' | 'Lead Engineer';
   displayName: string;
+  vesselId?: string;
+  preferences?: {
+    notifications: boolean;
+    theme: 'emerald' | 'amber' | 'violet';
+  };
+}
+
+interface Vessel {
+  id: string;
+  members: string[];
+  createdAt: any;
+}
+
+interface Invitation {
+  token: string;
+  vesselId: string;
+  used: boolean;
+  expiresAt?: any;
 }
 
 interface Message {
@@ -164,17 +190,258 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   // We don't throw here to avoid crashing the app, but we log it as requested
 }
 
-// --- Components ---
+function SettingsView({ profile, setProfile }: { profile: UserProfile | null, setProfile: (p: UserProfile) => void }) {
+  const [displayName, setDisplayName] = useState(profile?.displayName || '');
+  const [role, setRole] = useState(profile?.role || 'Lead Engineer');
+  const [notifications, setNotifications] = useState(profile?.preferences?.notifications ?? true);
+  const [theme, setTheme] = useState(profile?.preferences?.theme || 'emerald');
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [generatingInvite, setGeneratingInvite] = useState(false);
+
+  const generateInvite = async () => {
+    if (!profile?.vesselId) return;
+    setGeneratingInvite(true);
+    try {
+      const token = Math.random().toString(36).slice(2, 15);
+      await setDoc(doc(db, 'invitations', token), {
+        token,
+        vesselId: profile.vesselId,
+        used: false,
+        expiresAt: serverTimestamp()
+      });
+      const link = `${window.location.origin}${window.location.pathname}?invite=${token}`;
+      setInviteLink(link);
+    } catch (error) {
+      console.error("Failed to generate invite:", error);
+    } finally {
+      setGeneratingInvite(false);
+    }
+  };
+
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  const handleSave = async () => {
+    if (!profile) return;
+    setSaving(true);
+    setSuccess(false);
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      displayName,
+      role: role as 'Commander' | 'Lead Engineer',
+      preferences: {
+        notifications,
+        theme: theme as 'emerald' | 'amber' | 'violet'
+      }
+    };
+
+    try {
+      await updateDoc(doc(db, 'users', profile.uid), {
+        displayName,
+        role,
+        preferences: updatedProfile.preferences
+      });
+      setProfile(updatedProfile);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${profile.uid}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="p-8 flex flex-col h-full space-y-8 overflow-y-auto"
+    >
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3">
+            <Settings className="w-6 h-6 text-emerald-500" />
+            User Settings
+          </h3>
+          <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">Neural Link Configuration</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Profile Section */}
+        <div className="space-y-6 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800">
+          <div className="flex items-center gap-3 mb-4">
+            <User className="w-5 h-5 text-emerald-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-50">Profile Identity</h4>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Display Name</label>
+              <input 
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                placeholder="Enter your name..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Mission Role</label>
+              <select 
+                value={role}
+                onChange={(e) => setRole(e.target.value as any)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none"
+              >
+                <option value="Commander">Commander</option>
+                <option value="Lead Engineer">Lead Engineer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Preferences Section */}
+        <div className="space-y-6 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800">
+          <div className="flex items-center gap-3 mb-4">
+            <Zap className="w-5 h-5 text-amber-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-amber-50">Preferences</h4>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-zinc-200">Neural Notifications</p>
+                <p className="text-[10px] text-zinc-500">Receive alerts for cosmic resonance</p>
+              </div>
+              <button 
+                onClick={() => setNotifications(!notifications)}
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative",
+                  notifications ? "bg-emerald-500" : "bg-zinc-800"
+                )}
+              >
+                <motion.div 
+                  animate={{ x: notifications ? 26 : 2 }}
+                  className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-sm"
+                />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-bold text-zinc-200">Interface Theme</p>
+              <div className="flex gap-3">
+                {['emerald', 'amber', 'violet'].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTheme(t as any)}
+                    className={cn(
+                      "w-8 h-8 rounded-full border-2 transition-all",
+                      theme === t ? "border-white scale-110" : "border-transparent opacity-50",
+                      t === 'emerald' ? "bg-emerald-500" : t === 'amber' ? "bg-amber-500" : "bg-violet-500"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Invite Partner Section */}
+        <div className="space-y-6 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800 md:col-span-2">
+          <div className="flex items-center gap-3 mb-4">
+            <UserPlus className="w-5 h-5 text-blue-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-blue-50">Invite Partner</h4>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-xs text-zinc-400 max-w-2xl">
+              VESTA-11 is designed for exactly two souls. Generate a one-time invitation link to bring your partner into this shared vessel. Once they join, the link will expire.
+            </p>
+
+            {!inviteLink ? (
+              <button 
+                onClick={generateInvite}
+                disabled={generatingInvite}
+                className="px-6 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold rounded-lg hover:bg-blue-500/20 transition-all flex items-center gap-2"
+              >
+                {generatingInvite ? <Loader2 className="w-3 h-3 animate-spin" /> : <Link className="w-3 h-3" />}
+                Generate Invitation Link
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-[10px] font-mono text-zinc-400 truncate">
+                  {inviteLink}
+                </div>
+                <button 
+                  onClick={() => copyToClipboard(inviteLink)}
+                  className={cn(
+                    "p-2 rounded-lg transition-all flex items-center gap-2",
+                    copySuccess ? "bg-emerald-500 text-black" : "bg-blue-500 text-black hover:bg-blue-400"
+                  )}
+                  title="Copy Link"
+                >
+                  {copySuccess ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copySuccess && <span className="text-[10px] font-bold uppercase">Copied</span>}
+                </button>
+                <button 
+                  onClick={() => setInviteLink(null)}
+                  className="p-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 transition-all"
+                  title="Clear"
+                >
+                  <AlertCircle className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-8 flex items-center gap-4">
+        <button 
+          onClick={handleSave}
+          disabled={saving}
+          className="px-8 py-3 bg-emerald-500 text-black font-bold rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          {saving ? 'Syncing...' : 'Save Configuration'}
+        </button>
+
+        {success && (
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-emerald-400 text-xs font-mono uppercase tracking-widest"
+          >
+            <Check className="w-4 h-4" />
+            Neural Link Updated
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath' | 'settings'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [moonData, setMoonData] = useState(getMoonData());
   const [skyContext, setSkyContextState] = useState<any>(null);
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
+  const [vessel, setVessel] = useState<Vessel | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   useEffect(() => {
     const updateSky = async () => {
@@ -201,26 +468,98 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        
+        // Check for invite token in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteToken = urlParams.get('invite');
+
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        const userDoc = await getDoc(userRef);
+        let currentProfile: UserProfile;
+
         if (userDoc.exists()) {
-          setProfile(userDoc.data() as UserProfile);
+          currentProfile = userDoc.data() as UserProfile;
         } else {
           const role = firebaseUser.email === 'arya@eidosense.com' ? 'Commander' : 'Lead Engineer';
-          const newProfile: UserProfile = {
+          currentProfile = {
             uid: firebaseUser.uid,
             email: firebaseUser.email || '',
             role,
             displayName: firebaseUser.displayName || 'Astronaut',
+            preferences: {
+              notifications: true,
+              theme: 'emerald'
+            }
           };
-          await setDoc(doc(db, 'users', firebaseUser.uid), newProfile);
-          setProfile(newProfile);
+          await setDoc(userRef, currentProfile);
         }
 
-        // Setup presence and location tracking
+        // Handle Vessel Logic
+        if (!currentProfile.vesselId) {
+          if (inviteToken) {
+            try {
+              const inviteRef = doc(db, 'invitations', inviteToken);
+              const inviteDoc = await getDoc(inviteRef);
+
+              if (inviteDoc.exists() && !inviteDoc.data().used) {
+                const inviteData = inviteDoc.data() as Invitation;
+                const vesselRef = doc(db, 'vessels', inviteData.vesselId);
+                const vesselDoc = await getDoc(vesselRef);
+
+                if (vesselDoc.exists()) {
+                  const vesselData = vesselDoc.data() as Vessel;
+                  if (vesselData.members.length < 2) {
+                    // Join Vessel
+                    const updatedMembers = [...vesselData.members, firebaseUser.uid];
+                    await updateDoc(vesselRef, { members: updatedMembers });
+                    await updateDoc(userRef, { vesselId: inviteData.vesselId });
+                    await updateDoc(inviteRef, { used: true });
+                    
+                    currentProfile.vesselId = inviteData.vesselId;
+                    setVessel({ ...vesselData, members: updatedMembers });
+                    
+                    // Clear URL param
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                  } else {
+                    setInviteError("This vessel is already at maximum capacity (2/2).");
+                  }
+                }
+              } else {
+                setInviteError("Invalid or expired invitation link.");
+              }
+            } catch (err) {
+              console.error("Invite error:", err);
+              setInviteError("Failed to process invitation.");
+            }
+          }
+
+          // If still no vesselId (either no invite or invite failed), create a new one
+          if (!currentProfile.vesselId) {
+            const newVesselId = `vessel_${Math.random().toString(36).slice(2, 11)}`;
+            const newVessel: Vessel = {
+              id: newVesselId,
+              members: [firebaseUser.uid],
+              createdAt: serverTimestamp()
+            };
+            await setDoc(doc(db, 'vessels', newVesselId), newVessel);
+            await updateDoc(userRef, { vesselId: newVesselId });
+            currentProfile.vesselId = newVesselId;
+            setVessel(newVessel);
+          }
+        } else {
+          // Load existing vessel
+          const vesselDoc = await getDoc(doc(db, 'vessels', currentProfile.vesselId));
+          if (vesselDoc.exists()) {
+            setVessel(vesselDoc.data() as Vessel);
+          }
+        }
+
+        setProfile(currentProfile);
         trackPresence(firebaseUser.uid);
       } else {
         setUser(null);
         setProfile(null);
+        setVessel(null);
       }
       setLoading(false);
     });
@@ -228,18 +567,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-    // Listen for the OTHER user's presence
-    const q = query(collection(db, 'presence'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docs.forEach(doc => {
-        if (doc.id !== user.uid) {
-          setOtherPresence(doc.data() as Presence);
-        }
-      });
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'presence'));
+    if (!user || !vessel) return;
+    // Listen for the OTHER user's presence in the same vessel
+    const otherMemberId = vessel.members.find(m => m !== user.uid);
+    if (!otherMemberId) {
+      setOtherPresence(null);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(doc(db, 'presence', otherMemberId), (snapshot) => {
+      if (snapshot.exists()) {
+        setOtherPresence(snapshot.data() as Presence);
+      } else {
+        setOtherPresence(null);
+      }
+    }, (error) => handleFirestoreError(error, OperationType.GET, `presence/${otherMemberId}`));
     return () => unsubscribe();
-  }, [user]);
+  }, [user, vessel]);
 
   const trackPresence = (uid: string) => {
     // Update presence every minute
@@ -294,7 +638,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <LoginScreen moonData={moonData} />;
+    return <LoginScreen moonData={moonData} inviteError={inviteError} />;
   }
 
   return (
@@ -310,7 +654,7 @@ export default function App() {
       />
 
       <div className="relative z-10">
-        <Header profile={profile} />
+        <Header profile={profile} onSettingsClick={() => setActiveTab('settings')} />
         
         <main className="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Sidebar Nav */}
@@ -374,6 +718,15 @@ export default function App() {
                 label="Sync-Breath"
               />
             </div>
+
+            <div className="pt-4 pb-2 border-t border-zinc-800/50">
+              <NavButton 
+                active={activeTab === 'settings'} 
+                onClick={() => setActiveTab('settings')}
+                icon={<Settings className="w-4 h-4" />}
+                label="User Settings"
+              />
+            </div>
             
             <div className="pt-8">
               <FusionButton profile={profile} />
@@ -398,6 +751,7 @@ export default function App() {
               {activeTab === 'rocket' && <DopamineRocketView profile={profile} />}
               {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} />}
               {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
+              {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
             </AnimatePresence>
           </section>
         </main>
@@ -448,8 +802,12 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
   const [audioActive, setAudioActive] = useState(false);
 
   useEffect(() => {
-    if (!profile) return;
-    const q = query(collection(db, 'focus_sessions'), limit(1));
+    if (!profile?.vesselId) return;
+    const q = query(
+      collection(db, 'focus_sessions'), 
+      where('vesselId', '==', profile.vesselId),
+      limit(1)
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
         setSession({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as FocusSession);
@@ -458,7 +816,7 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
       }
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'focus_sessions'));
     return () => unsubscribe();
-  }, []);
+  }, [profile]);
 
   useEffect(() => {
     if (session?.active) {
@@ -473,8 +831,9 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
   }, [session, profile]);
 
   const startSession = async () => {
-    if (!topic.trim()) return;
+    if (!topic.trim() || !profile?.vesselId) return;
     await addDoc(collection(db, 'focus_sessions'), {
+      vesselId: profile.vesselId,
       active: true,
       startTime: serverTimestamp(),
       participants: [profile?.uid],
@@ -589,17 +948,22 @@ function HalfLifeSecretsView({ profile }: { profile: UserProfile | null }) {
   const [halfLife, setHalfLife] = useState(11);
 
   useEffect(() => {
-    if (!profile) return;
-    const q = query(collection(db, 'secrets'), orderBy('createdAt', 'desc'));
+    if (!profile?.vesselId) return;
+    const q = query(
+      collection(db, 'secrets'), 
+      where('vesselId', '==', profile.vesselId),
+      orderBy('createdAt', 'desc')
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setSecrets(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Secret)));
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'secrets'));
     return () => unsubscribe();
-  }, []);
+  }, [profile]);
 
   const sendSecret = async () => {
-    if (!newSecret.trim()) return;
+    if (!newSecret.trim() || !profile?.vesselId) return;
     await addDoc(collection(db, 'secrets'), {
+      vesselId: profile.vesselId,
       senderId: profile?.uid,
       content: newSecret,
       createdAt: serverTimestamp(),
@@ -787,7 +1151,7 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
   );
 }
 
-function LoginScreen({ moonData }: { moonData: any }) {
+function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: string | null }) {
   const [typewriterText, setTypewriterText] = useState('');
   const fullText = "System check... Nuclear Heart Stable. Navigation Locked. 11:03 is active.";
 
@@ -902,6 +1266,17 @@ function LoginScreen({ moonData }: { moonData: any }) {
         </div>
         
         <div className="space-y-4">
+          {inviteError && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-xs font-mono"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {inviteError}
+            </motion.div>
+          )}
+          
           <div className="space-y-1">
             <h1 className="text-7xl font-bold tracking-tighter text-white uppercase italic leading-none">VESTA-11</h1>
             <p className="text-emerald-500/60 font-mono text-xs tracking-[0.4em] uppercase">Deep Space Connection Module</p>
@@ -940,7 +1315,7 @@ function LoginScreen({ moonData }: { moonData: any }) {
   );
 }
 
-function Header({ profile }: { profile: UserProfile | null }) {
+function Header({ profile, onSettingsClick }: { profile: UserProfile | null, onSettingsClick: () => void }) {
   return (
     <header className="border-bottom border-zinc-800 p-6 flex items-center justify-between max-w-7xl mx-auto w-full">
       <div className="flex items-center gap-4">
@@ -955,12 +1330,21 @@ function Header({ profile }: { profile: UserProfile | null }) {
         </div>
       </div>
 
-      <button 
-        onClick={() => signOut(auth)}
-        className="p-2 text-zinc-500 hover:text-white transition-colors"
-      >
-        <LogOut className="w-5 h-5" />
-      </button>
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={onSettingsClick}
+          className="p-2 text-zinc-500 hover:text-white transition-colors flex items-center gap-2 group"
+        >
+          <span className="text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Settings</span>
+          <Settings className="w-5 h-5" />
+        </button>
+        <button 
+          onClick={() => signOut(auth)}
+          className="p-2 text-zinc-500 hover:text-white transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
+      </div>
     </header>
   );
 }
@@ -989,8 +1373,13 @@ function BrainDumpView({ profile, moonData }: { profile: UserProfile | null, moo
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!profile) return;
-    const q = query(collection(db, 'messages'), orderBy('timestamp', 'desc'), limit(50));
+    if (!profile?.vesselId) return;
+    const q = query(
+      collection(db, 'messages'), 
+      where('vesselId', '==', profile.vesselId),
+      orderBy('timestamp', 'desc'), 
+      limit(50)
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message));
       setMessages(msgs.reverse());
@@ -1004,7 +1393,7 @@ function BrainDumpView({ profile, moonData }: { profile: UserProfile | null, moo
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !profile) return;
+    if (!input.trim() || !profile?.vesselId) return;
 
     setSending(true);
     try {
@@ -1018,6 +1407,7 @@ function BrainDumpView({ profile, moonData }: { profile: UserProfile | null, moo
       const analysis = await analyzeBrainDump(input, profile.role, otherMessages, celestialContext);
       
       await addDoc(collection(db, 'messages'), {
+        vesselId: profile.vesselId,
         senderId: profile.uid,
         senderRole: profile.role,
         content: input,
@@ -1111,18 +1501,23 @@ function MissionControlView({ profile }: { profile: UserProfile | null }) {
   const [category, setCategory] = useState<Task['category']>('Life Support');
 
   useEffect(() => {
-    if (!profile) return;
-    const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
+    if (!profile?.vesselId) return;
+    const q = query(
+      collection(db, 'tasks'), 
+      where('vesselId', '==', profile.vesselId),
+      orderBy('createdAt', 'desc')
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setTasks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task)));
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'tasks'));
     return () => unsubscribe();
-  }, []);
+  }, [profile]);
 
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTask.trim()) return;
+    if (!newTask.trim() || !profile?.vesselId) return;
     await addDoc(collection(db, 'tasks'), {
+      vesselId: profile.vesselId,
       title: newTask,
       status: 'pending',
       category,
@@ -1305,8 +1700,12 @@ function ArchiveView({ profile }: { profile: UserProfile | null }) {
   const [pulses, setPulses] = useState<FusionPulse[]>([]);
 
   useEffect(() => {
-    if (!profile) return;
-    const q = query(collection(db, 'pulses'), orderBy('timestamp', 'desc'));
+    if (!profile?.vesselId) return;
+    const q = query(
+      collection(db, 'pulses'), 
+      where('vesselId', '==', profile.vesselId),
+      orderBy('timestamp', 'desc')
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPulses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FusionPulse)));
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'pulses'));
@@ -1394,9 +1793,10 @@ function FusionButton({ profile }: { profile: UserProfile | null }) {
   useEffect(() => {
     if (!profile) return;
 
-    // Listen for recent pulse attempts from the OTHER user
+    // Listen for recent pulse attempts from the OTHER user in the same vessel
     const q = query(
       collection(db, 'pulse_attempts'), 
+      where('vesselId', '==', profile.vesselId),
       orderBy('timestamp', 'desc'), 
       limit(1)
     );
@@ -1418,7 +1818,7 @@ function FusionButton({ profile }: { profile: UserProfile | null }) {
   }, [profile]);
 
   const handleSimultaneousFusion = async () => {
-    if (fusing || !profile) return;
+    if (fusing || !profile?.vesselId) return;
     setFusing(true);
     setShowAnimation(true);
     
@@ -1429,6 +1829,7 @@ function FusionButton({ profile }: { profile: UserProfile | null }) {
       const poem = await generateFusionPoem(profile.role, sharedHistory);
       
       await addDoc(collection(db, 'pulses'), {
+        vesselId: profile.vesselId,
         participants: ['Simultaneous Sync'],
         timestamp: serverTimestamp(),
         poem
@@ -1447,10 +1848,11 @@ function FusionButton({ profile }: { profile: UserProfile | null }) {
   };
 
   const triggerPulseAttempt = async () => {
-    if (fusing || !profile) return;
+    if (fusing || !profile?.vesselId) return;
     
     // Record our attempt
     await addDoc(collection(db, 'pulse_attempts'), {
+      vesselId: profile.vesselId,
       uid: profile.uid,
       timestamp: serverTimestamp()
     });

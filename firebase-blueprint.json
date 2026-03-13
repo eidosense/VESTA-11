@@ -18,62 +18,67 @@
       "description": "Subspace brain dump or communication",
       "type": "object",
       "properties": {
+        "vesselId": { "type": "string" },
         "senderId": { "type": "string" },
         "content": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" },
         "type": { "type": "string", "enum": ["brain-dump", "poem", "alert"] },
         "analysis": { "type": "string" }
       },
-      "required": ["senderId", "content", "timestamp"]
+      "required": ["vesselId", "senderId", "content", "timestamp"]
     },
     "Task": {
       "title": "Task",
       "description": "Ship maintenance or calibration task",
       "type": "object",
       "properties": {
+        "vesselId": { "type": "string" },
         "title": { "type": "string" },
         "status": { "type": "string", "enum": ["pending", "completed"] },
         "assignedTo": { "type": "string" },
         "category": { "type": "string", "enum": ["Life Support", "Navigation", "Nuclear Heart", "Olive Grove"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["title", "status", "category"]
+      "required": ["vesselId", "title", "status", "category"]
     },
     "FusionPulse": {
       "title": "FusionPulse",
       "description": "Simultaneous connection event",
       "type": "object",
       "properties": {
+        "vesselId": { "type": "string" },
         "participants": { "type": "array", "items": { "type": "string" } },
         "timestamp": { "type": "string", "format": "date-time" },
         "poem": { "type": "string" }
       },
-      "required": ["participants", "timestamp"]
+      "required": ["vesselId", "participants", "timestamp"]
     },
     "FocusSession": {
       "title": "FocusSession",
       "description": "Shared ADHD focus session",
       "type": "object",
       "properties": {
+        "vesselId": { "type": "string" },
         "active": { "type": "boolean" },
         "startTime": { "type": "string", "format": "date-time" },
         "participants": { "type": "array", "items": { "type": "string" } },
         "topic": { "type": "string" }
       },
-      "required": ["active", "startTime"]
+      "required": ["vesselId", "active", "startTime"]
     },
     "Secret": {
       "title": "Secret",
       "description": "A decaying message with a half-life",
       "type": "object",
       "properties": {
+        "vesselId": { "type": "string" },
         "senderId": { "type": "string" },
         "content": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "halfLifeHours": { "type": "number" },
         "status": { "type": "string", "enum": ["active", "decayed", "unlocked"] }
       },
-      "required": ["senderId", "content", "createdAt", "halfLifeHours"]
+      "required": ["vesselId", "senderId", "content", "createdAt", "halfLifeHours"]
     },
     "Presence": {
       "title": "Presence",
@@ -92,12 +97,43 @@
         "breathing": { "type": "boolean" }
       },
       "required": ["uid", "lastSeen"]
+    },
+    "Vessel": {
+      "title": "Vessel",
+      "description": "A shared space for exactly two users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "members"]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "A one-time link to join a vessel",
+      "type": "object",
+      "properties": {
+        "token": { "type": "string" },
+        "vesselId": { "type": "string" },
+        "used": { "type": "boolean" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["token", "vesselId", "used"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile data"
+    },
+    "/vessels/{vesselId}": {
+      "schema": "Vessel",
+      "description": "Shared vessel data"
+    },
+    "/invitations/{tokenId}": {
+      "schema": "Invitation",
+      "description": "One-time invitation tokens"
     },
     "/messages/{messageId}": {
       "schema": "Message",
