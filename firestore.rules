@@ -1,0 +1,104 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Fields:
+//   - uid: string (required)
+//   - email: string (required)
+//   - role: string (required, 'Commander' | 'Lead Engineer')
+//   - displayName: string
+//   - lastActive: timestamp
+//
+// Collection: messages
+// Fields:
+//   - senderId: string (required)
+//   - content: string (required)
+//   - timestamp: timestamp (required)
+//   - type: string ('brain-dump' | 'poem' | 'alert')
+//   - analysis: string
+//
+// Collection: tasks
+// Fields:
+//   - title: string (required)
+//   - status: string (required, 'pending' | 'completed')
+//   - assignedTo: string
+//   - category: string (required)
+//   - createdAt: timestamp
+//
+// Collection: pulses
+// Fields:
+//   - participants: list (required)
+//   - timestamp: timestamp (required)
+//   - poem: string
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "arya@eidosense.com" && request.auth.token.email_verified == true);
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
+    }
+
+    // Messages
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Fusion Pulses
+    match /pulses/{pulseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+    }
+
+    // Pulse Attempts
+    match /pulse_attempts/{attemptId} {
+      allow read, create: if isAuthenticated();
+    }
+
+    // Focus Sessions
+    match /focus_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Secrets
+    match /secrets/{secretId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+    }
+
+    // Presence
+    match /presence/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "VESTA-11",
+  "description": "Sentient Onboard Intelligence and Emotional Bridge for a long-distance mission between two Neurodivergent Astronauts.",
+  "requestFramePermissions": ["geolocation"]
+}
