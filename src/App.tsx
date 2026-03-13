@@ -813,12 +813,12 @@ function LoginScreen({ moonData }: { moonData: any }) {
 
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Nebula */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-30 grayscale-[0.5] scale-110"
+        className="absolute inset-0 bg-cover bg-center opacity-40 scale-110"
         style={{ 
-          backgroundImage: `url('https://picsum.photos/seed/nuclear-olive-tree/1920/1080')`,
-          filter: `brightness(${0.4 * coreBrightness}) contrast(1.2)`
+          backgroundImage: `url('https://picsum.photos/seed/deep-space-nebula/1920/1080')`,
+          filter: `brightness(${0.5 * coreBrightness}) contrast(1.4) hue-rotate(20deg)`
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505]" />
@@ -829,22 +829,75 @@ function LoginScreen({ moonData }: { moonData: any }) {
         className="text-center space-y-12 relative z-10"
       >
         <div className="relative group">
+          {/* Sacred Geometry Glow */}
           <motion.div 
-            animate={{ opacity: [coreBrightness * 0.5, coreBrightness, coreBrightness * 0.5] }}
-            transition={{ duration: 4, repeat: Infinity }}
-            className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-150" 
-          />
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="relative"
+            animate={{ 
+              opacity: [coreBrightness * 0.3, coreBrightness * 0.6, coreBrightness * 0.3],
+              rotate: [0, 90, 180, 270, 360]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
           >
-            <TreeDeciduous className="w-32 h-32 text-emerald-500 mx-auto drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-            <motion.div 
-              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-emerald-400 rounded-full blur-md" 
-            />
+            <div className="w-[400px] h-[400px] border border-emerald-500/10 rounded-full" />
+            <div className="absolute w-[300px] h-[300px] border border-emerald-500/20 rotate-45" />
+            <div className="absolute w-[300px] h-[300px] border border-emerald-500/20 -rotate-45" />
+          </motion.div>
+
+          {/* Logo Container */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="relative w-64 h-64 mx-auto"
+          >
+            {/* The Logo (SVG Representation of the requested surreal logo) */}
+            <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+              <defs>
+                <radialGradient id="coreGradient">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#064e3b" />
+                </radialGradient>
+                <filter id="dust">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+                </filter>
+              </defs>
+              
+              {/* Nuclear Core */}
+              <circle cx="100" cy="140" r="15" fill="url(#coreGradient)" className="animate-pulse" />
+              <circle cx="100" cy="140" r="20" fill="none" stroke="#10b981" strokeWidth="0.5" strokeDasharray="4 2" />
+              
+              {/* Trunk & Branches forming '11' */}
+              <path 
+                d="M100 140 L100 100 M85 100 L85 60 M115 100 L115 60" 
+                stroke="#10b981" 
+                strokeWidth="4" 
+                strokeLinecap="round"
+                fill="none"
+              />
+              
+              {/* Flourishing Branches */}
+              <path 
+                d="M85 80 Q60 70 50 40 M115 80 Q140 70 150 40 M100 100 Q100 70 100 30" 
+                stroke="#065f46" 
+                strokeWidth="2" 
+                fill="none"
+              />
+
+              {/* Cosmic Dust Leaves (Silver-Green) */}
+              <g filter="url(#dust)">
+                {[...Array(20)].map((_, i) => (
+                  <circle 
+                    key={i}
+                    cx={70 + Math.random() * 60} 
+                    cy={30 + Math.random() * 60} 
+                    r={1 + Math.random() * 2} 
+                    fill={i % 2 === 0 ? "#d1d5db" : "#10b981"} 
+                    className="animate-pulse"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  />
+                ))}
+              </g>
+            </svg>
           </motion.div>
         </div>
         
