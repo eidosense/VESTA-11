@@ -459,6 +459,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath' | 'settings'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
+  const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
   const [skyContext, setSkyContextState] = useState<any>(null);
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
@@ -654,7 +655,17 @@ export default function App() {
     // Listen for the OTHER user's presence in the same vessel
     const otherMemberId = vessel.members.find(m => m !== user.uid);
     if (!otherMemberId) {
-      setOtherPresence(null);
+      if (simulatePartner) {
+        setOtherPresence({
+          uid: 'simulated_partner',
+          lastSeen: serverTimestamp() as any,
+          location: { lat: 40.7128, lng: -74.0060 }, // New York
+          breathing: false,
+          typing: false
+        });
+      } else {
+        setOtherPresence(null);
+      }
       return;
     }
 
@@ -666,7 +677,7 @@ export default function App() {
       }
     }, (error) => handleFirestoreError(error, OperationType.GET, `presence/${otherMemberId}`));
     return () => unsubscribe();
-  }, [user, vessel]);
+  }, [user, vessel, simulatePartner]);
 
   const trackPresence = (uid: string) => {
     // Update presence every minute
@@ -1183,14 +1194,22 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
 
 function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | null, otherPresence: Presence | null }) {
   const [isBreathing, setIsBreathing] = useState(false);
+  const [simulatedBreathing, setSimulatedBreathing] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
     const presenceRef = doc(db, 'presence', profile.uid);
     updateDoc(presenceRef, { breathing: isBreathing });
-  }, [isBreathing, profile]);
+    
+    if (otherPresence?.uid === 'simulated_partner' && isBreathing) {
+      const timer = setTimeout(() => setSimulatedBreathing(true), 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setSimulatedBreathing(false);
+    }
+  }, [isBreathing, profile, otherPresence?.uid]);
 
-  const bothBreathing = isBreathing && otherPresence?.breathing;
+  const bothBreathing = isBreathing && (otherPresence?.breathing || simulatedBreathing);
 
   return (
     <motion.div 
