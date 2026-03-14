@@ -129,6 +129,13 @@ service cloud.firestore {
       allow update: if isMember(resource.data.vesselId);
     }
 
+    // Mission Logs
+    match /missionLogs/{logId} {
+      allow read: if isMember(resource.data.vesselId);
+      allow create: if isMember(request.resource.data.vesselId) && request.resource.data.astronautId == request.auth.uid;
+      allow update, delete: if isMember(resource.data.vesselId) && resource.data.astronautId == request.auth.uid;
+    }
+
     // Presence
     match /presence/{userId} {
       allow read: if isAuthenticated();

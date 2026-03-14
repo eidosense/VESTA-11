@@ -136,9 +136,27 @@
         "isEncrypted": { "type": "boolean" }
       },
       "required": ["vesselId", "authorId", "authorRole", "content", "title", "createdAt", "coordinates", "isEncrypted"]
+    },
+    "MissionLog": {
+      "title": "MissionLog",
+      "description": "Daily activities, observations, and personal thoughts of astronauts",
+      "type": "object",
+      "properties": {
+        "vesselId": { "type": "string" },
+        "astronautId": { "type": "string" },
+        "astronautRole": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["activity", "observation", "thought"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["vesselId", "astronautId", "astronautRole", "content", "type", "timestamp"]
     }
   },
   "firestore": {
+    "/missionLogs/{logId}": {
+      "schema": "MissionLog",
+      "description": "Mission logs for astronauts"
+    },
     "/archive_entries/{entryId}": {
       "schema": "ArchiveEntry",
       "description": "Encrypted poems and messages in the Olive Grove Archive"

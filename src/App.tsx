@@ -50,7 +50,9 @@ import {
   UserPlus,
   Copy,
   Link,
-  X
+  X,
+  BookOpen,
+  Save
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -102,6 +104,16 @@ interface Message {
   type: 'brain-dump' | 'poem' | 'alert';
   analysis?: string;
   senderRole?: string;
+}
+
+interface MissionLogEntry {
+  id: string;
+  vesselId: string;
+  astronautId: string;
+  astronautRole: string;
+  content: string;
+  type: 'activity' | 'observation' | 'thought';
+  timestamp: any;
 }
 
 interface Task {
@@ -459,7 +471,7 @@ export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath' | 'settings'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath' | 'settings' | 'mission-log'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
@@ -770,6 +782,12 @@ export default function App() {
               label="Mission Control"
             />
             <NavButton 
+              active={activeTab === 'mission-log'} 
+              onClick={() => setActiveTab('mission-log')}
+              icon={<BookOpen className="w-4 h-4" />}
+              label="Mission Log"
+            />
+            <NavButton 
               active={activeTab === 'archive'} 
               onClick={() => setActiveTab('archive')}
               icon={<Archive className="w-4 h-4" />}
@@ -844,6 +862,7 @@ export default function App() {
             <AnimatePresence mode="wait">
               {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
               {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
+              {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
               {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
               {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
               {activeTab === 'rocket' && <DopamineRocketView profile={profile} />}
@@ -1887,13 +1906,28 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="p-6 space-y-8 h-full overflow-y-auto"
+      className="flex flex-col h-full p-6 space-y-8 overflow-y-auto"
     >
       <div className="space-y-4">
         <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2 text-rose-50">
           <ClipboardList className="w-5 h-5 text-rose-400" />
           Ship Maintenance Protocols
         </h3>
+        
+        {tasks.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-[10px] font-mono uppercase tracking-widest text-rose-200/60">
+              <span>Mission Progress</span>
+              <span>{Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
+            </div>
+            <div className="h-1.5 bg-black/50 rounded-full overflow-hidden border border-white/5">
+              <div 
+                className="h-full bg-gradient-to-r from-rose-500 to-indigo-500 transition-all duration-500"
+                style={{ width: `${(tasks.filter(t => t.status === 'completed').length / tasks.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
         
         <form onSubmit={addTask} className="space-y-3">
           <div className="flex gap-2">
@@ -1942,7 +1976,7 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
                 "w-5 h-5 rounded-full border flex items-center justify-center transition-colors",
                 task.status === 'completed' ? "bg-rose-500 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "border-white/20 group-hover:border-rose-500/50"
               )}>
-                {task.status === 'completed' && <Zap className="w-3 h-3 text-white" />}
+                {task.status === 'completed' && <Check className="w-3 h-3 text-white" />}
               </div>
               <div>
                 <p className={cn("text-sm font-medium text-rose-50", task.status === 'completed' && "line-through text-rose-200/40")}>
@@ -1955,6 +1989,11 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
             </div>
           </div>
         ))}
+        {tasks.length === 0 && (
+          <div className="text-center py-12 text-rose-200/40 text-sm italic">
+            No protocols defined. The ship is quiet.
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -2042,6 +2081,121 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
             {getEmotionalDistance()}
           </p>
         </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function MissionLogView({ profile, addSR }: { profile: UserProfile | null, addSR: (amount: number, reason: string) => void }) {
+  const [logs, setLogs] = useState<MissionLogEntry[]>([]);
+  const [content, setContent] = useState('');
+  const [type, setType] = useState<'activity' | 'observation' | 'thought'>('activity');
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (!profile?.vesselId) return;
+    const q = query(
+      collection(db, 'missionLogs'),
+      where('vesselId', '==', profile.vesselId),
+      orderBy('timestamp', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MissionLogEntry)));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'missionLogs'));
+    return () => unsubscribe();
+  }, [profile]);
+
+  const handleLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim() || !profile?.vesselId) return;
+
+    setSending(true);
+    try {
+      await addDoc(collection(db, 'missionLogs'), {
+        vesselId: profile.vesselId,
+        astronautId: profile.uid,
+        astronautRole: profile.role,
+        content,
+        type,
+        timestamp: serverTimestamp()
+      });
+      addSR(10, 'Mission Log Recorded');
+      setContent('');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="flex flex-col h-full p-6 space-y-6 overflow-y-auto"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <BookOpen className="w-6 h-6 text-rose-400" />
+        <div>
+          <h2 className="text-xl font-bold text-white uppercase tracking-widest">Mission Log</h2>
+          <p className="text-xs text-rose-200/60 font-mono">Record activities, observations, and thoughts</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleLog} className="space-y-4 bg-black/20 border border-white/10 p-6 rounded-2xl backdrop-blur-sm">
+        <div className="flex gap-4">
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as any)}
+            className="bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-rose-500/50 text-rose-50"
+          >
+            <option value="activity">Activity</option>
+            <option value="observation">Observation</option>
+            <option value="thought">Personal Thought</option>
+          </select>
+        </div>
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Log entry..."
+          className="w-full h-24 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500/50 resize-none text-rose-50"
+        />
+        <button 
+          type="submit"
+          disabled={!content.trim() || sending}
+          className="w-full py-3 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 shadow-[0_0_15px_rgba(244,63,94,0.3)] flex items-center justify-center gap-2"
+        >
+          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Record Entry
+        </button>
+      </form>
+
+      <div className="space-y-4">
+        {logs.map(log => (
+          <div key={log.id} className="p-4 bg-black/40 border border-white/10 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className={cn(
+                  "text-[10px] font-mono uppercase px-2 py-1 rounded",
+                  log.type === 'activity' ? "bg-blue-500/20 text-blue-300" :
+                  log.type === 'observation' ? "bg-emerald-500/20 text-emerald-300" :
+                  "bg-purple-500/20 text-purple-300"
+                )}>
+                  {log.type}
+                </span>
+                <span className="text-xs font-bold text-rose-100">{log.astronautRole}</span>
+              </div>
+              <span className="text-[10px] font-mono text-rose-200/40">
+                {log.timestamp ? format(log.timestamp.toDate(), 'MMM dd, HH:mm') : '...'}
+              </span>
+            </div>
+            <p className="text-sm text-rose-50/80 whitespace-pre-wrap">{log.content}</p>
+          </div>
+        ))}
+        {logs.length === 0 && (
+          <div className="text-center py-12 text-rose-200/40 text-sm italic">
+            No logs recorded yet.
+          </div>
+        )}
       </div>
     </motion.div>
   );
