@@ -49,14 +49,15 @@ import {
   AlertCircle,
   UserPlus,
   Copy,
-  Link
+  Link,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { format, addHours, isAfter } from 'date-fns';
 import Markdown from 'react-markdown';
-import { analyzeBrainDump, generateFusionPoem, generateFocusMessage } from './lib/gemini';
+import { analyzeBrainDump, generateFusionPoem, generateFocusMessage, generatePredictiveAnalysis } from './lib/gemini';
 import { getMoonData, getEmotionalDistance, SINGULARITY_SKY, getSkyContext } from './services/astronomyService';
 import { Moon, Sun, Compass, Star } from 'lucide-react';
 
@@ -124,6 +125,7 @@ interface Presence {
   lastSeen: any;
   location?: { lat: number, lng: number };
   breathing?: boolean;
+  typing?: boolean;
 }
 
 interface FocusSession {
@@ -840,7 +842,7 @@ export default function App() {
               </div>
             )}
             <AnimatePresence mode="wait">
-              {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} />}
+              {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
               {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
               {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
               {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
@@ -1567,11 +1569,15 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: UserProfile | null, moonData: any, addSR: (amount: number, reason: string) => void, updateStreak: () => void }) {
+function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }: { profile: UserProfile | null, moonData: any, addSR: (amount: number, reason: string) => void, updateStreak: () => void, otherPresence: Presence | null }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'entangled' | 'vesta'>('all');
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const [generatingPrediction, setGeneratingPrediction] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!profile?.vesselId) return;
@@ -1588,9 +1594,39 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
     return () => unsubscribe();
   }, [profile]);
 
+  const [simulatedTyping, setSimulatedTyping] = useState(false);
+
+  useEffect(() => {
+    if (otherPresence?.uid === 'simulated_partner') {
+      const interval = setInterval(() => {
+        if (Math.random() > 0.7) {
+          setSimulatedTyping(true);
+          setTimeout(() => setSimulatedTyping(false), 2000 + Math.random() * 3000);
+        }
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [otherPresence?.uid]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
-  }, [messages]);
+  }, [messages, prediction, otherPresence?.typing, simulatedTyping]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    if (!profile) return;
+
+    // Update typing status
+    const presenceRef = doc(db, 'presence', profile.uid);
+    updateDoc(presenceRef, { typing: true });
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      updateDoc(presenceRef, { typing: false });
+    }, 2000);
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1598,6 +1634,9 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
 
     setSending(true);
     try {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      await updateDoc(doc(db, 'presence', profile.uid), { typing: false });
+
       // Get other user's recent messages for thematic overlap detection
       const otherMessages = messages
         .filter(m => m.senderId !== profile.uid)
@@ -1632,20 +1671,103 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
     }
   };
 
+  const handlePredictiveAnalysis = async () => {
+    if (!profile) return;
+    setGeneratingPrediction(true);
+    try {
+      const myRecent = messages.filter(m => m.senderId === profile.uid).slice(-5).map(m => m.content);
+      const otherRecent = messages.filter(m => m.senderId !== profile.uid).slice(-5).map(m => m.content);
+      
+      const result = await generatePredictiveAnalysis(profile.role, myRecent, otherRecent);
+      setPrediction(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setGeneratingPrediction(false);
+    }
+  };
+
+  const filteredMessages = messages.filter(msg => {
+    if (filter === 'all') return true;
+    if (filter === 'entangled') return msg.analysis?.includes('QUANTUM ENTANGLEMENT ALERT');
+    if (filter === 'vesta') return !!msg.analysis;
+    return true;
+  });
+
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="flex flex-col h-full"
     >
-      <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
-          <span className="text-xs font-mono uppercase tracking-widest text-rose-200/60">Subspace Frequency: Active</span>
+      <div className="p-4 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-black/20 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
+            <span className="text-xs font-mono uppercase tracking-widest text-rose-200/60">Subspace Frequency: Active</span>
+            <div className="flex items-end gap-[2px] h-3 ml-2">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ height: ['20%', '100%', '20%'] }}
+                  transition={{ duration: 1 + Math.random(), repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+                  className="w-1 bg-rose-400/60 rounded-full"
+                />
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setFilter('all')}
+              className={cn("text-[10px] uppercase font-mono px-2 py-1 rounded", filter === 'all' ? "bg-white/20 text-white" : "text-white/50 hover:bg-white/10")}
+            >
+              All
+            </button>
+            <button 
+              onClick={() => setFilter('entangled')}
+              className={cn("text-[10px] uppercase font-mono px-2 py-1 rounded", filter === 'entangled' ? "bg-indigo-500/40 text-indigo-200" : "text-white/50 hover:bg-white/10")}
+            >
+              Entangled
+            </button>
+            <button 
+              onClick={() => setFilter('vesta')}
+              className={cn("text-[10px] uppercase font-mono px-2 py-1 rounded", filter === 'vesta' ? "bg-rose-500/40 text-rose-200" : "text-white/50 hover:bg-white/10")}
+            >
+              VESTA-11
+            </button>
+          </div>
         </div>
+        
+        <button
+          onClick={handlePredictiveAnalysis}
+          disabled={generatingPrediction || messages.length < 2}
+          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 rounded-lg text-indigo-200 text-xs font-mono uppercase tracking-widest transition-colors disabled:opacity-50"
+        >
+          {generatingPrediction ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
+          Predictive Analysis
+        </button>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
-        {messages.map((msg) => (
+        {prediction && (
+          <div className="max-w-[90%] mx-auto p-6 rounded-2xl bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.15)] relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-indigo-400" />
+                <span className="font-mono text-xs uppercase tracking-widest text-indigo-300">Mission Parameter Prediction</span>
+              </div>
+              <button onClick={() => setPrediction(null)} className="text-white/50 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="prose prose-invert prose-indigo text-sm leading-relaxed">
+              <Markdown>{prediction}</Markdown>
+            </div>
+          </div>
+        )}
+
+        {filteredMessages.map((msg) => (
           <div key={msg.id} className={cn(
             "flex flex-col gap-2",
             msg.senderId === profile?.uid ? "items-end" : "items-start"
@@ -1684,12 +1806,27 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
             )}
           </div>
         ))}
+        
+        {(otherPresence?.typing || simulatedTyping) && (
+          <div className="flex items-start gap-2">
+            <div className="max-w-[80%] p-4 rounded-2xl text-sm bg-black/40 border border-white/10 text-rose-100/80">
+              <p className="font-mono text-[10px] uppercase tracking-widest mb-2 opacity-50">
+                {profile?.role === 'Commander' ? 'Lead Engineer' : 'Commander'} // Typing...
+              </p>
+              <div className="flex gap-1 items-center h-4">
+                <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} className="w-1.5 h-1.5 bg-rose-400/60 rounded-full" />
+                <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} className="w-1.5 h-1.5 bg-rose-400/60 rounded-full" />
+                <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} className="w-1.5 h-1.5 bg-rose-400/60 rounded-full" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSend} className="p-4 bg-black/20 backdrop-blur-sm border-t border-white/10 flex gap-2">
         <input 
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Initiate brain dump..."
           className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-rose-500/50 transition-colors text-rose-50"
         />

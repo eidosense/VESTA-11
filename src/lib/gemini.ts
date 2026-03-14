@@ -79,6 +79,32 @@ export async function generateFusionPoem(role: string, sharedHistory: string[]) 
   return response.text;
 }
 
+export async function generatePredictiveAnalysis(role: string, recentMessages: string[], otherMessages: string[]) {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  
+  const prompt = `
+    Current User: ${role}
+    Recent Brain Dumps: ${recentMessages.join(' | ')}
+    Other User's Recent Dumps: ${otherMessages.join(' | ')}
+    
+    Task:
+    1. Perform a "Predictive Mission Parameter Analysis" based on the recent thoughts of both astronauts.
+    2. Identify potential emotional or cognitive trajectories for the next 24 hours.
+    3. Suggest a "Course Correction" or "Synchronization Protocol" if their thoughts are diverging, or celebrate their alignment if converging.
+    4. Keep it concise, using aerospace and nuclear physics metaphors.
+    5. Format with clear headings: [TRAJECTORY], [ALIGNMENT STATUS], [PROTOCOL].
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+    },
+  });
+  return response.text;
+}
+
 export async function generateFocusMessage(role: string, topic: string) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
