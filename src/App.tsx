@@ -1705,6 +1705,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
       setInput('');
     } catch (error) {
       console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, 'messages');
     } finally {
       setSending(false);
     }
@@ -1721,6 +1722,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
       setPrediction(result);
     } catch (error) {
       console.error(error);
+      // Not a firestore error, just a gemini error, so we just log it.
     } finally {
       setGeneratingPrediction(false);
     }
