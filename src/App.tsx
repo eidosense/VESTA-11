@@ -22,7 +22,8 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
-  limit
+  limit,
+  increment
 } from 'firebase/firestore';
 import { 
   Atom, 
@@ -80,6 +81,9 @@ interface Vessel {
   id: string;
   members: string[];
   createdAt: any;
+  sr: number;
+  streakDays?: number;
+  lastSyncDate?: string;
 }
 
 interface Invitation {
@@ -137,6 +141,18 @@ interface Secret {
   createdAt: any;
   halfLifeHours: number;
   status: 'active' | 'decayed' | 'unlocked';
+}
+
+interface ArchiveEntry {
+  id: string;
+  vesselId: string;
+  authorId: string;
+  authorRole: string;
+  content: string;
+  title: string;
+  createdAt: any;
+  coordinates: string;
+  isEncrypted: boolean;
 }
 
 enum OperationType {
@@ -431,6 +447,12 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
   );
 }
 
+interface ToastMessage {
+  id: string;
+  message: string;
+  amount: number;
+}
+
 export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -442,6 +464,56 @@ export default function App() {
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
   const [vessel, setVessel] = useState<Vessel | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addSR = async (amount: number, reason: string) => {
+    if (!profile?.vesselId) return;
+    
+    // Show toast
+    const id = Math.random().toString(36).slice(2);
+    setToasts(prev => [...prev, { id, message: reason, amount }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+
+    // Update DB
+    await updateDoc(doc(db, 'vessels', profile.vesselId), {
+      sr: increment(amount)
+    });
+  };
+
+  const updateStreak = async () => {
+    if (!vessel || !profile?.vesselId) return;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const lastSync = vessel.lastSyncDate;
+    
+    if (lastSync === today) return; // Already synced today
+    
+    let newStreak = 1;
+    if (lastSync) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      if (lastSync === yesterdayStr) {
+        newStreak = (vessel.streakDays || 0) + 1;
+      }
+    }
+    
+    await updateDoc(doc(db, 'vessels', profile.vesselId), {
+      streakDays: newStreak,
+      lastSyncDate: today
+    });
+    
+    if (newStreak === 3) {
+      addSR(500, "SUPERNOVA EVENT: 3-Day Entanglement Streak!");
+      setLaunchMessage("SUPERNOVA EVENT: Your minds are perfectly entangled. The universe sings an epic ballad in your honor.");
+      setTimeout(() => setLaunchMessage(null), 10000);
+    } else {
+      addSR(20, `Entanglement Streak: Day ${newStreak}`);
+    }
+  };
 
   useEffect(() => {
     const updateSky = async () => {
@@ -539,7 +611,8 @@ export default function App() {
             const newVessel: Vessel = {
               id: newVesselId,
               members: [firebaseUser.uid],
-              createdAt: serverTimestamp()
+              createdAt: serverTimestamp(),
+              sr: 0
             };
             await setDoc(doc(db, 'vessels', newVesselId), newVessel);
             await updateDoc(userRef, { vesselId: newVesselId });
@@ -565,6 +638,16 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!profile?.vesselId) return;
+    const unsubscribe = onSnapshot(doc(db, 'vessels', profile.vesselId), (doc) => {
+      if (doc.exists()) {
+        setVessel(doc.data() as Vessel);
+      }
+    });
+    return () => unsubscribe();
+  }, [profile?.vesselId]);
 
   useEffect(() => {
     if (!user || !vessel) return;
@@ -654,7 +737,7 @@ export default function App() {
       />
 
       <div className="relative z-10">
-        <Header profile={profile} onSettingsClick={() => setActiveTab('settings')} />
+        <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
         
         <main className="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Sidebar Nav */}
@@ -729,7 +812,7 @@ export default function App() {
             </div>
             
             <div className="pt-8">
-              <FusionButton profile={profile} />
+              <FusionButton profile={profile} addSR={addSR} />
             </div>
           </nav>
 
@@ -744,12 +827,12 @@ export default function App() {
               </div>
             )}
             <AnimatePresence mode="wait">
-              {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} />}
-              {activeTab === 'mission-control' && <MissionControlView profile={profile} />}
-              {activeTab === 'archive' && <ArchiveView profile={profile} />}
+              {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} />}
+              {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
+              {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
               {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
               {activeTab === 'rocket' && <DopamineRocketView profile={profile} />}
-              {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} />}
+              {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}
               {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
               {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
             </AnimatePresence>
@@ -761,6 +844,29 @@ export default function App() {
           <span className="w-1 h-1 bg-zinc-800 rounded-full" />
           <span>VESTA-11 Onboard</span>
         </footer>
+
+        {/* Toasts */}
+        <div className="fixed bottom-16 right-8 flex flex-col gap-2 z-50">
+          <AnimatePresence>
+            {toasts.map(toast => (
+              <motion.div
+                key={toast.id}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-zinc-900 border border-emerald-500/30 shadow-lg shadow-emerald-500/10 rounded-xl p-4 flex items-center gap-3"
+              >
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white uppercase tracking-wider">{toast.message}</p>
+                  <p className="text-[10px] text-emerald-400 font-mono">+{toast.amount} SR</p>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
 
         <AnimatePresence>
           {launchMessage && (
@@ -942,7 +1048,7 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
   );
 }
 
-function HalfLifeSecretsView({ profile }: { profile: UserProfile | null }) {
+function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, addSR: (amount: number, reason: string) => void }) {
   const [secrets, setSecrets] = useState<Secret[]>([]);
   const [newSecret, setNewSecret] = useState('');
   const [halfLife, setHalfLife] = useState(11);
@@ -970,6 +1076,7 @@ function HalfLifeSecretsView({ profile }: { profile: UserProfile | null }) {
       halfLifeHours: halfLife,
       status: 'active'
     });
+    addSR(20, "Half-Life Secret Shared");
     setNewSecret('');
   };
 
@@ -1315,37 +1422,90 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
   );
 }
 
-function Header({ profile, onSettingsClick }: { profile: UserProfile | null, onSettingsClick: () => void }) {
-  return (
-    <header className="border-bottom border-zinc-800 p-6 flex items-center justify-between max-w-7xl mx-auto w-full">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-          <TreeDeciduous className="w-5 h-5 text-emerald-500" />
-        </div>
-        <div>
-          <h2 className="text-sm font-bold text-white tracking-tight uppercase italic">VESTA-11</h2>
-          <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
-            {profile?.role} // Room {profile?.role === 'Commander' ? '5' : '6'}
-          </p>
-        </div>
-      </div>
+function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | null, vessel: Vessel | null, onSettingsClick: () => void }) {
+  const sr = vessel?.sr || 0;
+  
+  let rank = "Interstellar Dust";
+  let nextRankSR = 500;
+  let prevRankSR = 0;
+  let treeColor = "text-zinc-500";
+  let treeGlow = "";
+  
+  if (sr > 10000) {
+    rank = "The Singularity";
+    nextRankSR = sr;
+    prevRankSR = 10000;
+    treeColor = "text-white";
+    treeGlow = "drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]";
+  } else if (sr > 5000) {
+    rank = "Binary System";
+    nextRankSR = 10000;
+    prevRankSR = 5000;
+    treeColor = "text-emerald-300";
+    treeGlow = "drop-shadow-[0_0_10px_rgba(110,231,183,0.6)]";
+  } else if (sr > 2000) {
+    rank = "Main Sequence";
+    nextRankSR = 5000;
+    prevRankSR = 2000;
+    treeColor = "text-emerald-400";
+    treeGlow = "drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]";
+  } else if (sr > 500) {
+    rank = "Protostar";
+    nextRankSR = 2000;
+    prevRankSR = 500;
+    treeColor = "text-emerald-500";
+    treeGlow = "drop-shadow-[0_0_5px_rgba(16,185,129,0.2)]";
+  }
 
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={onSettingsClick}
-          className="p-2 text-zinc-500 hover:text-white transition-colors flex items-center gap-2 group"
-        >
-          <span className="text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Settings</span>
-          <Settings className="w-5 h-5" />
-        </button>
-        <button 
-          onClick={() => signOut(auth)}
-          className="p-2 text-zinc-500 hover:text-white transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
+  const progressPercent = sr >= 10000 ? 100 : Math.max(0, Math.min(100, ((sr - prevRankSR) / (nextRankSR - prevRankSR)) * 100));
+
+  return (
+    <div className="w-full flex flex-col">
+      {/* Level Bar */}
+      <div className="w-full h-1 bg-zinc-900 relative overflow-hidden">
+        <motion.div 
+          className="absolute top-0 left-0 h-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"
+          initial={{ width: 0 }}
+          animate={{ width: `${progressPercent}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
       </div>
-    </header>
+      
+      <header className="border-b border-zinc-800 p-6 flex items-center justify-between max-w-7xl mx-auto w-full">
+        <div className="flex items-center gap-4">
+          <div className={`w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center transition-all duration-1000 ${treeGlow}`}>
+            <TreeDeciduous className={`w-5 h-5 transition-colors duration-1000 ${treeColor}`} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white tracking-tight uppercase italic">VESTA-11</h2>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
+                {profile?.role} // Room {profile?.role === 'Commander' ? '5' : '6'}
+              </p>
+              <span className="text-[10px] text-emerald-500 font-mono uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                {rank} ({sr} SR)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onSettingsClick}
+            className="p-2 text-zinc-500 hover:text-white transition-colors flex items-center gap-2 group"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Settings</span>
+            <Settings className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={() => signOut(auth)}
+            className="p-2 text-zinc-500 hover:text-white transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+    </div>
   );
 }
 
@@ -1366,7 +1526,7 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function BrainDumpView({ profile, moonData }: { profile: UserProfile | null, moonData: any }) {
+function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: UserProfile | null, moonData: any, addSR: (amount: number, reason: string) => void, updateStreak: () => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -1415,6 +1575,14 @@ function BrainDumpView({ profile, moonData }: { profile: UserProfile | null, moo
         type: 'brain-dump',
         analysis
       });
+      
+      if (analysis.includes("Quantum Entanglement")) {
+        addSR(50, "Quantum Entanglement Detected!");
+      } else {
+        addSR(5, "Subspace Dump Transmitted");
+      }
+
+      updateStreak();
       setInput('');
     } catch (error) {
       console.error(error);
@@ -1495,7 +1663,7 @@ function BrainDumpView({ profile, moonData }: { profile: UserProfile | null, moo
   );
 }
 
-function MissionControlView({ profile }: { profile: UserProfile | null }) {
+function MissionControlView({ profile, addSR }: { profile: UserProfile | null, addSR: (amount: number, reason: string) => void }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState('');
   const [category, setCategory] = useState<Task['category']>('Life Support');
@@ -1528,9 +1696,14 @@ function MissionControlView({ profile }: { profile: UserProfile | null }) {
   };
 
   const toggleTask = async (task: Task) => {
+    const isCompleting = task.status === 'pending';
     await updateDoc(doc(db, 'tasks', task.id), {
-      status: task.status === 'pending' ? 'completed' : 'pending'
+      status: isCompleting ? 'completed' : 'pending'
     });
+    
+    if (isCompleting && task.category === 'Life Support') {
+      addSR(10, "Life Support Task Completed");
+    }
   };
 
   return (
@@ -1696,21 +1869,87 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
   );
 }
 
-function ArchiveView({ profile }: { profile: UserProfile | null }) {
+function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (amount: number, reason: string) => void }) {
   const [pulses, setPulses] = useState<FusionPulse[]>([]);
+  const [entries, setEntries] = useState<ArchiveEntry[]>([]);
+  const [newTitle, setNewTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [activeTab, setActiveTab] = useState<'pulses' | 'entries'>('entries');
+  const [decryptedIds, setDecryptedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!profile?.vesselId) return;
-    const q = query(
+    
+    const qPulses = query(
       collection(db, 'pulses'), 
       where('vesselId', '==', profile.vesselId),
       orderBy('timestamp', 'desc')
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribePulses = onSnapshot(qPulses, (snapshot) => {
       setPulses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FusionPulse)));
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'pulses'));
-    return () => unsubscribe();
+
+    const qEntries = query(
+      collection(db, 'archive_entries'), 
+      where('vesselId', '==', profile.vesselId),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubscribeEntries = onSnapshot(qEntries, (snapshot) => {
+      setEntries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ArchiveEntry)));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'archive_entries'));
+
+    return () => {
+      unsubscribePulses();
+      unsubscribeEntries();
+    };
   }, [profile]);
+
+  const handleArchive = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.vesselId || !newTitle.trim() || !newContent.trim()) return;
+
+    const sectors = ['11-A', '11-B', '11-C', '11-Omega', '11-Alpha'];
+    const clusters = ['Silver Leaf Cluster', 'Zeytin Nebula', 'Resonance Field', 'Singularity Point'];
+    const randomSector = sectors[Math.floor(Math.random() * sectors.length)];
+    const randomCluster = clusters[Math.floor(Math.random() * clusters.length)];
+
+    try {
+      await addDoc(collection(db, 'archive_entries'), {
+        vesselId: profile.vesselId,
+        authorId: profile.uid,
+        authorRole: profile.role,
+        title: newTitle,
+        content: newContent,
+        createdAt: serverTimestamp(),
+        coordinates: `Sector ${randomSector}, ${randomCluster}`,
+        isEncrypted: true
+      });
+      setNewTitle('');
+      setNewContent('');
+      addSR(15, "Archived to Olive Grove");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'archive_entries');
+    }
+  };
+
+  const toggleDecryption = (id: string) => {
+    setDecryptedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const scrambleText = (text: string) => {
+    return text.replace(/[a-zA-Z]/g, () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+      return chars[Math.floor(Math.random() * chars.length)];
+    });
+  };
 
   return (
     <motion.div 
@@ -1760,33 +1999,138 @@ function ArchiveView({ profile }: { profile: UserProfile | null }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        {pulses.map((pulse) => (
-          <div key={pulse.id} className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TreeDeciduous className="w-24 h-24" />
-            </div>
-            
-            <div className="flex items-center gap-2 mb-4 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
-              <Clock className="w-3 h-3" />
-              {pulse.timestamp ? format(pulse.timestamp.toDate(), 'dd.MM.yyyy // HH:mm') : '...'}
-            </div>
+      <div className="flex gap-4 border-b border-zinc-800 pb-2">
+        <button
+          onClick={() => setActiveTab('entries')}
+          className={cn(
+            "text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-colors",
+            activeTab === 'entries' ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-500 hover:text-zinc-400"
+          )}
+        >
+          Cosmic Coordinates
+        </button>
+        <button
+          onClick={() => setActiveTab('pulses')}
+          className={cn(
+            "text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-colors",
+            activeTab === 'pulses' ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-500 hover:text-zinc-400"
+          )}
+        >
+          Fusion Pulses
+        </button>
+      </div>
 
-            <div className="relative z-10">
-              <div className="prose prose-invert prose-emerald text-lg italic font-serif leading-relaxed">
-                <Markdown>
-                  {pulse.poem}
-                </Markdown>
+      {activeTab === 'entries' && (
+        <div className="space-y-8">
+          <form onSubmit={handleArchive} className="space-y-4 bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              Encrypt New Entry
+            </h4>
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Entry Title..."
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50"
+            />
+            <textarea
+              value={newContent}
+              onChange={(e) => setNewContent(e.target.value)}
+              placeholder="Write your poem or message to be encrypted in the silver leaves..."
+              className="w-full h-32 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50 resize-none"
+            />
+            <button 
+              type="submit"
+              disabled={!newTitle.trim() || !newContent.trim()}
+              className="w-full py-3 bg-emerald-500 text-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Archive to 11-Master Frequency
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 gap-6">
+            {entries.map((entry) => {
+              const isDecrypted = decryptedIds.has(entry.id);
+              return (
+                <div key={entry.id} className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <TreeDeciduous className="w-24 h-24" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-500">
+                      <MapPin className="w-3 h-3" />
+                      {entry.coordinates}
+                    </div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+                      <Clock className="w-3 h-3 inline mr-1" />
+                      {entry.createdAt ? format(entry.createdAt.toDate(), 'dd.MM.yyyy // HH:mm') : '...'}
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 space-y-4">
+                    <h5 className="text-lg font-bold text-white">{isDecrypted ? entry.title : scrambleText(entry.title)}</h5>
+                    <div className="prose prose-invert prose-emerald text-sm italic font-serif leading-relaxed">
+                      <Markdown>
+                        {isDecrypted ? entry.content : scrambleText(entry.content)}
+                      </Markdown>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-zinc-800/50 flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-zinc-500">
+                        Author: {entry.authorRole}
+                      </span>
+                      <button
+                        onClick={() => toggleDecryption(entry.id)}
+                        className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+                      >
+                        {isDecrypted ? <Lock className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
+                        {isDecrypted ? 'Encrypt' : 'Attune to 11-Master'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {entries.length === 0 && (
+              <p className="text-center text-zinc-500 text-xs italic py-8">No entries found in the Olive Grove Archive.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'pulses' && (
+        <div className="grid grid-cols-1 gap-6">
+          {pulses.map((pulse) => (
+            <div key={pulse.id} className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <TreeDeciduous className="w-24 h-24" />
+              </div>
+              
+              <div className="flex items-center gap-2 mb-4 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+                <Clock className="w-3 h-3" />
+                {pulse.timestamp ? format(pulse.timestamp.toDate(), 'dd.MM.yyyy // HH:mm') : '...'}
+              </div>
+
+              <div className="relative z-10">
+                <div className="prose prose-invert prose-emerald text-lg italic font-serif leading-relaxed">
+                  <Markdown>
+                    {pulse.poem}
+                  </Markdown>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+          {pulses.length === 0 && (
+            <p className="text-center text-zinc-500 text-xs italic py-8">No fusion pulses recorded yet.</p>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
 
-function FusionButton({ profile }: { profile: UserProfile | null }) {
+function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: (amount: number, reason: string) => void }) {
   const [fusing, setFusing] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
 
@@ -1835,6 +2179,8 @@ function FusionButton({ profile }: { profile: UserProfile | null }) {
         poem
       });
       
+      addSR(100, "11:03 Sync Achieved!");
+
       // Keep animation for a bit
       setTimeout(() => {
         setFusing(false);

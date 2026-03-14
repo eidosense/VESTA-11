@@ -122,6 +122,13 @@ service cloud.firestore {
       allow update: if isMember(resource.data.vesselId);
     }
 
+    // Archive Entries
+    match /archive_entries/{entryId} {
+      allow read: if isMember(resource.data.vesselId);
+      allow create: if isMember(request.resource.data.vesselId);
+      allow update: if isMember(resource.data.vesselId);
+    }
+
     // Presence
     match /presence/{userId} {
       allow read: if isAuthenticated();

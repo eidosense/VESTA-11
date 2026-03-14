@@ -120,9 +120,29 @@
         "expiresAt": { "type": "string", "format": "date-time" }
       },
       "required": ["token", "vesselId", "used"]
+    },
+    "ArchiveEntry": {
+      "title": "ArchiveEntry",
+      "description": "Encrypted poems and messages in the Olive Grove Archive",
+      "type": "object",
+      "properties": {
+        "vesselId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorRole": { "type": "string" },
+        "content": { "type": "string" },
+        "title": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "coordinates": { "type": "string" },
+        "isEncrypted": { "type": "boolean" }
+      },
+      "required": ["vesselId", "authorId", "authorRole", "content", "title", "createdAt", "coordinates", "isEncrypted"]
     }
   },
   "firestore": {
+    "/archive_entries/{entryId}": {
+      "schema": "ArchiveEntry",
+      "description": "Encrypted poems and messages in the Olive Grove Archive"
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile data"

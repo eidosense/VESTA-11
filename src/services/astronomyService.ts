@@ -1,5 +1,5 @@
 import { format, differenceInDays } from 'date-fns';
-import { MoonPhase, Body, Observer } from 'astronomy-engine';
+import * as Astronomy from 'astronomy-engine';
 
 export interface MoonData {
   phase: number; // 0 to 1
@@ -19,7 +19,7 @@ export const SINGULARITY_SKY = {
 };
 
 export function getMoonData(date: Date = new Date()): MoonData {
-  const phase = MoonPhase(date) / 360; // Convert degrees to 0-1
+  const phase = Astronomy.MoonPhase(date) / 360; // Convert degrees to 0-1
   
   let phaseName = '';
   if (phase < 0.0625 || phase > 0.9375) phaseName = 'New Moon';
