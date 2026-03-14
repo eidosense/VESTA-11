@@ -1407,6 +1407,26 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
             <span className="tracking-widest uppercase text-sm">Establish Neural Link</span>
           </span>
         </button>
+
+        <div className="pt-8 flex items-center justify-center gap-6">
+          <a 
+            href="https://privacy.vesta11.space" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-zinc-500 hover:text-emerald-400 text-[10px] font-mono uppercase tracking-widest transition-colors"
+          >
+            Privacy Policy
+          </a>
+          <span className="text-zinc-800">•</span>
+          <a 
+            href="https://terms.vesta11.space" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-zinc-500 hover:text-emerald-400 text-[10px] font-mono uppercase tracking-widest transition-colors"
+          >
+            Terms of Service
+          </a>
+        </div>
       </motion.div>
 
       {/* Decorative Elements */}
