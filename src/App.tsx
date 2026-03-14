@@ -73,7 +73,7 @@ interface UserProfile {
   vesselId?: string;
   preferences?: {
     notifications: boolean;
-    theme: 'emerald' | 'amber' | 'violet';
+    theme: 'rose' | 'indigo' | 'fuchsia';
   };
 }
 
@@ -210,7 +210,7 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
   const [displayName, setDisplayName] = useState(profile?.displayName || '');
   const [role, setRole] = useState(profile?.role || 'Lead Engineer');
   const [notifications, setNotifications] = useState(profile?.preferences?.notifications ?? true);
-  const [theme, setTheme] = useState(profile?.preferences?.theme || 'emerald');
+  const [theme, setTheme] = useState(profile?.preferences?.theme || 'rose');
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
@@ -255,7 +255,7 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
       role: role as 'Commander' | 'Lead Engineer',
       preferences: {
         notifications,
-        theme: theme as 'emerald' | 'amber' | 'violet'
+        theme: theme as 'rose' | 'indigo' | 'fuchsia'
       }
     };
 
@@ -284,40 +284,40 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
     >
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3">
-            <Settings className="w-6 h-6 text-emerald-500" />
+          <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">
+            <Settings className="w-6 h-6 text-rose-400" />
             User Settings
           </h3>
-          <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">Neural Link Configuration</p>
+          <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">Neural Link Configuration</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Profile Section */}
-        <div className="space-y-6 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800">
+        <div className="space-y-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-sm">
           <div className="flex items-center gap-3 mb-4">
-            <User className="w-5 h-5 text-emerald-400" />
-            <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-50">Profile Identity</h4>
+            <User className="w-5 h-5 text-rose-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-rose-50">Profile Identity</h4>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Display Name</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Display Name</label>
               <input 
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-colors"
                 placeholder="Enter your name..."
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Mission Role</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Mission Role</label>
               <select 
                 value={role}
                 onChange={(e) => setRole(e.target.value as any)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-colors appearance-none"
               >
                 <option value="Commander">Commander</option>
                 <option value="Lead Engineer">Lead Engineer</option>
@@ -327,23 +327,23 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
         </div>
 
         {/* Preferences Section */}
-        <div className="space-y-6 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800">
+        <div className="space-y-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-sm">
           <div className="flex items-center gap-3 mb-4">
-            <Zap className="w-5 h-5 text-amber-400" />
-            <h4 className="text-sm font-bold uppercase tracking-widest text-amber-50">Preferences</h4>
+            <Zap className="w-5 h-5 text-indigo-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-indigo-50">Preferences</h4>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-zinc-200">Neural Notifications</p>
-                <p className="text-[10px] text-zinc-500">Receive alerts for cosmic resonance</p>
+                <p className="text-xs font-bold text-rose-50">Neural Notifications</p>
+                <p className="text-[10px] text-rose-200/40">Receive alerts for cosmic resonance</p>
               </div>
               <button 
                 onClick={() => setNotifications(!notifications)}
                 className={cn(
                   "w-12 h-6 rounded-full transition-colors relative",
-                  notifications ? "bg-emerald-500" : "bg-zinc-800"
+                  notifications ? "bg-rose-500" : "bg-white/10"
                 )}
               >
                 <motion.div 
@@ -354,16 +354,16 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
             </div>
 
             <div className="space-y-3">
-              <p className="text-xs font-bold text-zinc-200">Interface Theme</p>
+              <p className="text-xs font-bold text-rose-50">Interface Theme</p>
               <div className="flex gap-3">
-                {['emerald', 'amber', 'violet'].map((t) => (
+                {['rose', 'indigo', 'fuchsia'].map((t) => (
                   <button
                     key={t}
                     onClick={() => setTheme(t as any)}
                     className={cn(
                       "w-8 h-8 rounded-full border-2 transition-all",
                       theme === t ? "border-white scale-110" : "border-transparent opacity-50",
-                      t === 'emerald' ? "bg-emerald-500" : t === 'amber' ? "bg-amber-500" : "bg-violet-500"
+                      t === 'rose' ? "bg-rose-500" : t === 'indigo' ? "bg-indigo-500" : "bg-fuchsia-500"
                     )}
                   />
                 ))}
@@ -373,14 +373,14 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
         </div>
 
         {/* Invite Partner Section */}
-        <div className="space-y-6 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800 md:col-span-2">
+        <div className="space-y-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-sm md:col-span-2">
           <div className="flex items-center gap-3 mb-4">
-            <UserPlus className="w-5 h-5 text-blue-400" />
-            <h4 className="text-sm font-bold uppercase tracking-widest text-blue-50">Invite Partner</h4>
+            <UserPlus className="w-5 h-5 text-fuchsia-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-fuchsia-50">Invite Partner</h4>
           </div>
 
           <div className="space-y-4">
-            <p className="text-xs text-zinc-400 max-w-2xl">
+            <p className="text-xs text-rose-200/60 max-w-2xl">
               VESTA-11 is designed for exactly two souls. Generate a one-time invitation link to bring your partner into this shared vessel. Once they join, the link will expire.
             </p>
 
@@ -388,21 +388,21 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
               <button 
                 onClick={generateInvite}
                 disabled={generatingInvite}
-                className="px-6 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold rounded-lg hover:bg-blue-500/20 transition-all flex items-center gap-2"
+                className="px-6 py-2 bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 text-xs font-bold rounded-lg hover:bg-fuchsia-500/20 transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(217,70,239,0.1)]"
               >
                 {generatingInvite ? <Loader2 className="w-3 h-3 animate-spin" /> : <Link className="w-3 h-3" />}
                 Generate Invitation Link
               </button>
             ) : (
               <div className="flex items-center gap-2">
-                <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-[10px] font-mono text-zinc-400 truncate">
+                <div className="flex-1 bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-[10px] font-mono text-rose-200/60 truncate">
                   {inviteLink}
                 </div>
                 <button 
                   onClick={() => copyToClipboard(inviteLink)}
                   className={cn(
                     "p-2 rounded-lg transition-all flex items-center gap-2",
-                    copySuccess ? "bg-emerald-500 text-black" : "bg-blue-500 text-black hover:bg-blue-400"
+                    copySuccess ? "bg-gradient-to-r from-rose-500 to-indigo-500 text-white" : "bg-fuchsia-500 text-white hover:bg-fuchsia-400"
                   )}
                   title="Copy Link"
                 >
@@ -411,7 +411,7 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
                 </button>
                 <button 
                   onClick={() => setInviteLink(null)}
-                  className="p-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 transition-all"
+                  className="p-2 bg-white/10 text-rose-200/60 rounded-lg hover:bg-white/20 transition-all"
                   title="Clear"
                 >
                   <AlertCircle className="w-4 h-4" />
@@ -426,7 +426,7 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
         <button 
           onClick={handleSave}
           disabled={saving}
-          className="px-8 py-3 bg-emerald-500 text-black font-bold rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+          className="px-8 py-3 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-xl hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.3)]"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           {saving ? 'Syncing...' : 'Save Configuration'}
@@ -436,7 +436,7 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
           <motion.div 
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-emerald-400 text-xs font-mono uppercase tracking-widest"
+            className="flex items-center gap-2 text-rose-400 text-xs font-mono uppercase tracking-widest"
           >
             <Check className="w-4 h-4" />
             Neural Link Updated
@@ -560,7 +560,7 @@ export default function App() {
             displayName: firebaseUser.displayName || 'Astronaut',
             preferences: {
               notifications: true,
-              theme: 'emerald'
+              theme: 'rose'
             }
           };
           await setDoc(userRef, currentProfile);
@@ -715,7 +715,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
       </div>
     );
   }
@@ -725,16 +725,18 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-emerald-50/90 font-sans selection:bg-emerald-500/30 relative">
+    <div className="min-h-screen bg-black text-rose-50/90 font-sans selection:bg-rose-500/30 relative">
       {/* 11.03.2026 Star Map Background Layer */}
       <div 
-        className="fixed inset-0 pointer-events-none opacity-[0.07] grayscale invert z-0"
+        className="fixed inset-0 pointer-events-none opacity-40 z-0 animate-slow-pan"
         style={{ 
-          backgroundImage: `url('https://picsum.photos/seed/star-map-2026/1920/1080')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop')`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
+          filter: 'brightness(0.5) contrast(1.2)'
         }}
       />
+      <div className="fixed inset-0 bg-gradient-to-b from-indigo-950/60 via-purple-900/30 to-black/90 z-0" />
 
       <div className="relative z-10">
         <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
@@ -761,21 +763,21 @@ export default function App() {
               label="Olive Grove Archive"
             />
             
-            <div className="pt-4 pb-2 border-t border-zinc-800/50">
+            <div className="pt-4 pb-2 border-t border-white/10">
               <div className="px-4 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Moon className="w-3 h-3 text-emerald-500" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">{moonData.phaseName}</span>
+                  <Moon className="w-3 h-3 text-rose-400" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/60">{moonData.phaseName}</span>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-emerald-500" style={{ opacity: moonData.illumination }} />
+                <div className="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.8)]" style={{ opacity: moonData.illumination }} />
               </div>
-              <p className="px-4 text-[8px] font-mono uppercase tracking-tighter text-zinc-600">
+              <p className="px-4 text-[8px] font-mono uppercase tracking-tighter text-rose-200/40">
                 {getEmotionalDistance()}
               </p>
             </div>
 
-            <div className="pt-4 pb-2 border-t border-zinc-800/50">
-              <p className="px-4 text-[10px] uppercase tracking-widest text-zinc-600 mb-2">Modules</p>
+            <div className="pt-4 pb-2 border-t border-white/10">
+              <p className="px-4 text-[10px] uppercase tracking-widest text-rose-200/40 mb-2">Modules</p>
               <NavButton 
                 active={activeTab === 'parallax'} 
                 onClick={() => setActiveTab('parallax')}
@@ -802,7 +804,7 @@ export default function App() {
               />
             </div>
 
-            <div className="pt-4 pb-2 border-t border-zinc-800/50">
+            <div className="pt-4 pb-2 border-t border-white/10">
               <NavButton 
                 active={activeTab === 'settings'} 
                 onClick={() => setActiveTab('settings')}
@@ -817,11 +819,11 @@ export default function App() {
           </nav>
 
           {/* Content Area */}
-          <section className="lg:col-span-9 bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-[75vh] relative">
+          <section className="lg:col-span-9 bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden flex flex-col h-[75vh] relative shadow-[0_0_40px_rgba(0,0,0,0.5)]">
             {skyContext?.current?.resonance?.active && (
-              <div className="absolute top-0 left-0 right-0 z-50 bg-emerald-500/10 border-b border-emerald-500/20 px-4 py-2 flex items-center gap-3">
-                <Zap className="w-3 h-3 text-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400">
+              <div className="absolute top-0 left-0 right-0 z-50 bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 flex items-center gap-3">
+                <Zap className="w-3 h-3 text-rose-400 animate-pulse" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
                   {skyContext.current.resonance.message}
                 </span>
               </div>
@@ -839,10 +841,10 @@ export default function App() {
           </section>
         </main>
 
-        <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono flex items-center gap-4">
+        <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] text-rose-200/40 font-mono flex items-center gap-4">
           <span>Singularity: 11.03.2026</span>
-          <span className="w-1 h-1 bg-zinc-800 rounded-full" />
-          <span>VESTA-11 Onboard</span>
+          <span className="w-1 h-1 bg-white/20 rounded-full" />
+          <span>VESTA-11 Shared Orbit</span>
         </footer>
 
         {/* Toasts */}
@@ -854,14 +856,14 @@ export default function App() {
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-zinc-900 border border-emerald-500/30 shadow-lg shadow-emerald-500/10 rounded-xl p-4 flex items-center gap-3"
+                className="bg-black/80 backdrop-blur-md border border-rose-500/30 shadow-lg shadow-rose-500/20 rounded-xl p-4 flex items-center gap-3"
               >
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-emerald-400" />
+                <div className="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-rose-400" />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-white uppercase tracking-wider">{toast.message}</p>
-                  <p className="text-[10px] text-emerald-400 font-mono">+{toast.amount} SR</p>
+                  <p className="text-[10px] text-rose-400 font-mono">+{toast.amount} SR</p>
                 </div>
               </motion.div>
             ))}
@@ -874,18 +876,18 @@ export default function App() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="fixed bottom-12 right-12 max-w-sm p-6 bg-zinc-900 border border-emerald-500/30 rounded-2xl shadow-2xl z-[100]"
+              className="fixed bottom-12 right-12 max-w-sm p-6 bg-black/80 backdrop-blur-xl border border-rose-500/30 rounded-2xl shadow-[0_0_40px_rgba(244,114,182,0.2)] z-[100]"
             >
               <div className="flex items-start gap-4">
-                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                  <Rocket className="w-5 h-5 text-emerald-500" />
+                <div className="p-2 bg-rose-500/10 rounded-lg">
+                  <Rocket className="w-5 h-5 text-rose-400" />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-xs font-mono uppercase tracking-widest text-emerald-500">System Launch</p>
-                  <p className="text-sm text-zinc-300 leading-relaxed">{launchMessage}</p>
+                  <p className="text-xs font-mono uppercase tracking-widest text-rose-400">System Launch</p>
+                  <p className="text-sm text-rose-100 leading-relaxed">{launchMessage}</p>
                   <button 
                     onClick={() => setLaunchMessage(null)}
-                    className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 hover:text-emerald-400 transition-colors"
+                    className="text-[10px] font-mono uppercase tracking-widest text-rose-200/60 hover:text-rose-300 transition-colors"
                   >
                     [ Acknowledge ]
                   </button>
@@ -960,19 +962,19 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
     >
       <div className="flex items-center justify-between mb-12">
         <div className="space-y-1">
-          <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3">
-            <Rocket className="w-6 h-6 text-emerald-500" />
+          <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">
+            <Rocket className="w-6 h-6 text-rose-400" />
             Dopamine Rocket
           </h3>
-          <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">ADHD Hyper-focus Calibration</p>
+          <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">ADHD Hyper-focus Calibration</p>
         </div>
         
         {session?.active && (
           <button 
             onClick={() => setAudioActive(!audioActive)}
             className={cn(
-              "p-3 rounded-full border transition-all",
-              audioActive ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "border-zinc-800 text-zinc-500"
+              "p-3 rounded-full border transition-all shadow-[0_0_15px_rgba(0,0,0,0.2)]",
+              audioActive ? "bg-rose-500/20 border-rose-500 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]" : "border-white/10 text-rose-200/40 hover:text-rose-200"
             )}
           >
             <Volume2 className={cn("w-5 h-5", audioActive && "animate-pulse")} />
@@ -987,29 +989,29 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Define focus trajectory (e.g., Coding Module 7)..."
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-emerald-500/50"
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-rose-500/50 text-rose-50"
             />
             <button 
               onClick={startSession}
-              className="w-full py-4 bg-emerald-500 text-black font-bold rounded-2xl uppercase tracking-widest hover:bg-emerald-400 transition-colors"
+              className="w-full py-4 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-2xl uppercase tracking-widest hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(244,63,94,0.3)]"
             >
               Ignite Rocket
             </button>
           </div>
-          <p className="text-zinc-600 font-mono text-[10px] uppercase tracking-widest">Ambient Noise: Nuclear Reactor Hum (Standby)</p>
+          <p className="text-rose-200/40 font-mono text-[10px] uppercase tracking-widest">Ambient Noise: Nuclear Reactor Hum (Standby)</p>
         </div>
       ) : (
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-8 flex flex-col justify-center">
             <div className="space-y-2">
-              <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-emerald-500">Current Trajectory</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-rose-400">Current Trajectory</p>
               <h4 className="text-3xl font-serif italic text-white">{session.topic}</h4>
             </div>
             
-            <div className="p-6 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-4">
+            <div className="p-6 bg-black/50 border border-white/10 rounded-2xl space-y-4 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Mission Duration</span>
-                <span className="text-emerald-500 font-mono">ACTIVE</span>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Mission Duration</span>
+                <span className="text-rose-400 font-mono">ACTIVE</span>
               </div>
               <button 
                 onClick={endSession}
@@ -1020,10 +1022,10 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
             </div>
           </div>
 
-          <div className="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-6 flex flex-col">
+          <div className="bg-black/20 border border-white/10 rounded-2xl p-6 flex flex-col backdrop-blur-sm shadow-[0_0_20px_rgba(0,0,0,0.3)]">
             <div className="flex items-center gap-2 mb-6">
-              <Radio className="w-4 h-4 text-emerald-500" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Radio Comms Feed</span>
+              <Radio className="w-4 h-4 text-rose-400" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Radio Comms Feed</span>
             </div>
             
             <div className="flex-1 space-y-4 overflow-y-auto">
@@ -1032,13 +1034,13 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
                   key={i}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="p-3 bg-emerald-500/5 border-l-2 border-emerald-500/30 text-xs italic text-emerald-400/70"
+                  className="p-3 bg-rose-500/5 border-l-2 border-rose-500/30 text-xs italic text-rose-400/70"
                 >
                   {msg}
                 </motion.div>
               ))}
               {radioMessages.length === 0 && (
-                <p className="text-zinc-600 text-xs italic">Awaiting first transmission...</p>
+                <p className="text-rose-200/40 text-xs italic">Awaiting first transmission...</p>
               )}
             </div>
           </div>
@@ -1094,32 +1096,32 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
       className="p-8 flex flex-col h-full space-y-8 overflow-y-auto"
     >
       <div className="space-y-1">
-        <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3">
-          <Lock className="w-6 h-6 text-emerald-500" />
+        <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">
+          <Lock className="w-6 h-6 text-rose-400" />
           The Half-Life of a Secret
         </h3>
-        <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">Radioactive Emotional Decay</p>
+        <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">Radioactive Emotional Decay</p>
       </div>
 
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-4">
+      <div className="bg-black/50 border border-white/10 rounded-2xl p-6 space-y-4 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
         <textarea 
           value={newSecret}
           onChange={(e) => setNewSecret(e.target.value)}
           placeholder="Encrypt a secret..."
-          className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none h-24"
+          className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none h-24 text-rose-50"
         />
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+        <div className="flex items-center justify-between pt-4 border-t border-white/10">
           <div className="flex items-center gap-4">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Half-Life: {halfLife}H</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Half-Life: {halfLife}H</span>
             <input 
               type="range" min="1" max="48" value={halfLife}
               onChange={(e) => setHalfLife(parseInt(e.target.value))}
-              className="w-32 accent-emerald-500"
+              className="w-32 accent-rose-500"
             />
           </div>
           <button 
             onClick={sendSecret}
-            className="px-6 py-2 bg-emerald-500 text-black font-bold rounded-xl text-xs uppercase tracking-widest"
+            className="px-6 py-2 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(244,63,94,0.3)]"
           >
             Isotope Launch
           </button>
@@ -1135,8 +1137,8 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
             <div 
               key={secret.id}
               className={cn(
-                "p-6 rounded-2xl border transition-all relative overflow-hidden",
-                isDecayed ? "bg-zinc-900/20 border-red-500/20" : "bg-zinc-900/50 border-zinc-800"
+                "p-6 rounded-2xl border transition-all relative overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.2)]",
+                isDecayed ? "bg-black/20 border-red-500/20" : "bg-black/40 border-white/10 hover:border-rose-500/30"
               )}
             >
               <div 
@@ -1146,19 +1148,19 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
               
               <div className="relative z-10 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">
                     {secret.senderId === profile?.uid ? 'Outgoing' : 'Incoming'} Isotope
                   </span>
                   <span className={cn(
                     "text-[10px] font-mono uppercase tracking-widest",
-                    isDecayed ? "text-red-500" : "text-emerald-500"
+                    isDecayed ? "text-red-500" : "text-rose-400"
                   )}>
                     {isDecayed ? 'DECAYED' : `${((1 - decay) * 100).toFixed(0)}% STABLE`}
                   </span>
                 </div>
                 
                 <p className={cn(
-                  "text-sm italic font-serif leading-relaxed",
+                  "text-sm italic font-serif leading-relaxed text-rose-50",
                   isDecayed && "blur-sm select-none opacity-30"
                 )}>
                   {secret.content}
@@ -1196,11 +1198,11 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
       className="p-8 flex flex-col items-center justify-center h-full space-y-12"
     >
       <div className="text-center space-y-2">
-        <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center justify-center gap-3">
-          <Wind className="w-6 h-6 text-emerald-500" />
+        <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center justify-center gap-3 text-rose-50">
+          <Wind className="w-6 h-6 text-rose-400" />
           Sync-Breath
         </h3>
-        <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">ADHD Nervous System Regulation</p>
+        <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">ADHD Nervous System Regulation</p>
       </div>
 
       <div className="relative flex items-center justify-center">
@@ -1211,7 +1213,7 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 2.5, opacity: 0 }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeOut" }}
-              className="absolute w-64 h-64 border-2 border-emerald-500 rounded-full"
+              className="absolute w-64 h-64 border-2 border-rose-500 rounded-full shadow-[0_0_20px_rgba(244,63,94,0.3)]"
             />
           )}
         </AnimatePresence>
@@ -1223,27 +1225,27 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
           onTouchEnd={() => setIsBreathing(false)}
           animate={{ 
             scale: isBreathing ? [1, 1.2, 1] : 1,
-            borderColor: bothBreathing ? '#10b981' : '#27272a'
+            borderColor: bothBreathing ? '#f43f5e' : 'rgba(255,255,255,0.1)'
           }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className={cn(
-            "w-64 h-64 rounded-full border-4 flex flex-col items-center justify-center gap-4 transition-all z-10 bg-zinc-950/50 backdrop-blur-xl",
-            isBreathing ? "shadow-[0_0_50px_rgba(16,185,129,0.2)]" : ""
+            "w-64 h-64 rounded-full border-4 flex flex-col items-center justify-center gap-4 transition-all z-10 bg-black/40 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)]",
+            isBreathing ? "shadow-[0_0_50px_rgba(244,63,94,0.2)]" : ""
           )}
         >
           <TreeDeciduous className={cn(
             "w-16 h-16 transition-colors",
-            isBreathing ? "text-emerald-500" : "text-zinc-800"
+            isBreathing ? "text-rose-500" : "text-rose-900/50"
           )} />
           <div className="text-center">
             <p className={cn(
               "text-[10px] font-mono uppercase tracking-[0.3em] transition-colors",
-              isBreathing ? "text-emerald-400" : "text-zinc-600"
+              isBreathing ? "text-rose-400" : "text-rose-200/40"
             )}>
               {bothBreathing ? 'SYNCHRONIZED' : isBreathing ? 'BREATHING' : 'HOLD TO SYNC'}
             </p>
             {otherPresence?.breathing && !isBreathing && (
-              <p className="text-[8px] font-mono uppercase tracking-widest text-emerald-500/50 mt-2 animate-pulse">
+              <p className="text-[8px] font-mono uppercase tracking-widest text-rose-500/50 mt-2 animate-pulse">
                 The other is breathing...
               </p>
             )}
@@ -1251,7 +1253,7 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
         </motion.button>
       </div>
 
-      <div className="max-w-md text-center text-sm italic text-zinc-400 leading-relaxed">
+      <div className="max-w-md text-center text-sm italic text-rose-200/40 leading-relaxed">
         "In the silence between breaths, we occupy the same space. Two hearts, one frequency, across the light-years."
       </div>
     </motion.div>
@@ -1260,7 +1262,7 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
 
 function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: string | null }) {
   const [typewriterText, setTypewriterText] = useState('');
-  const fullText = "System check... Nuclear Heart Stable. Navigation Locked. 11:03 is active.";
+  const fullText = "System check... Heartbeat synchronized. Navigation Locked. 11:03 is active.";
 
   useEffect(() => {
     let i = 0;
@@ -1280,19 +1282,19 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
   };
 
   // Core brightness based on moon illumination
-  const coreBrightness = 0.2 + (moonData.illumination * 0.8);
+  const coreBrightness = 0.4 + (moonData.illumination * 0.6);
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Nebula */}
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Deep Space Romantic Nebula Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40 scale-110"
+        className="absolute inset-0 bg-cover bg-center opacity-60 scale-110 animate-slow-pan"
         style={{ 
-          backgroundImage: `url('https://picsum.photos/seed/deep-space-nebula/1920/1080')`,
-          filter: `brightness(${0.5 * coreBrightness}) contrast(1.4) hue-rotate(20deg)`
+          backgroundImage: `url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop')`,
+          filter: `brightness(${0.6 * coreBrightness}) contrast(1.2) saturate(1.5)`
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/40 via-purple-900/40 to-black/90" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -1306,12 +1308,12 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
               opacity: [coreBrightness * 0.3, coreBrightness * 0.6, coreBrightness * 0.3],
               rotate: [0, 90, 180, 270, 360]
             }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
           >
-            <div className="w-[400px] h-[400px] border border-emerald-500/10 rounded-full" />
-            <div className="absolute w-[300px] h-[300px] border border-emerald-500/20 rotate-45" />
-            <div className="absolute w-[300px] h-[300px] border border-emerald-500/20 -rotate-45" />
+            <div className="w-[400px] h-[400px] border border-rose-400/20 rounded-full" />
+            <div className="absolute w-[300px] h-[300px] border border-indigo-400/20 rotate-45" />
+            <div className="absolute w-[300px] h-[300px] border border-fuchsia-400/20 -rotate-45" />
           </motion.div>
 
           {/* Logo Container */}
@@ -1321,11 +1323,11 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
             className="relative w-64 h-64 mx-auto"
           >
             {/* The Logo (SVG Representation of the requested surreal logo) */}
-            <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+            <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_30px_rgba(244,114,182,0.4)]">
               <defs>
                 <radialGradient id="coreGradient">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#064e3b" />
+                  <stop offset="0%" stopColor="#fb7185" />
+                  <stop offset="100%" stopColor="#4c1d95" />
                 </radialGradient>
                 <filter id="dust">
                   <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
@@ -1335,12 +1337,12 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
               
               {/* Nuclear Core */}
               <circle cx="100" cy="140" r="15" fill="url(#coreGradient)" className="animate-pulse" />
-              <circle cx="100" cy="140" r="20" fill="none" stroke="#10b981" strokeWidth="0.5" strokeDasharray="4 2" />
+              <circle cx="100" cy="140" r="20" fill="none" stroke="#fb7185" strokeWidth="0.5" strokeDasharray="4 2" />
               
               {/* Trunk & Branches forming '11' */}
               <path 
                 d="M100 140 L100 100 M85 100 L85 60 M115 100 L115 60" 
-                stroke="#10b981" 
+                stroke="#fb7185" 
                 strokeWidth="4" 
                 strokeLinecap="round"
                 fill="none"
@@ -1349,12 +1351,12 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
               {/* Flourishing Branches */}
               <path 
                 d="M85 80 Q60 70 50 40 M115 80 Q140 70 150 40 M100 100 Q100 70 100 30" 
-                stroke="#065f46" 
+                stroke="#be123c" 
                 strokeWidth="2" 
                 fill="none"
               />
 
-              {/* Cosmic Dust Leaves (Silver-Green) */}
+              {/* Cosmic Dust Leaves (Silver-Rose) */}
               <g filter="url(#dust)">
                 {[...Array(20)].map((_, i) => (
                   <circle 
@@ -1362,7 +1364,7 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
                     cx={70 + Math.random() * 60} 
                     cy={30 + Math.random() * 60} 
                     r={1 + Math.random() * 2} 
-                    fill={i % 2 === 0 ? "#d1d5db" : "#10b981"} 
+                    fill={i % 2 === 0 ? "#e0e7ff" : "#fb7185"} 
                     className="animate-pulse"
                     style={{ animationDelay: `${i * 0.2}s` }}
                   />
@@ -1385,12 +1387,12 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
           )}
           
           <div className="space-y-1">
-            <h1 className="text-7xl font-bold tracking-tighter text-white uppercase italic leading-none">VESTA-11</h1>
-            <p className="text-emerald-500/60 font-mono text-xs tracking-[0.4em] uppercase">Deep Space Connection Module</p>
+            <h1 className="text-7xl font-bold tracking-tighter text-white uppercase italic leading-none drop-shadow-lg">VESTA-11</h1>
+            <p className="text-rose-300/80 font-mono text-xs tracking-[0.4em] uppercase">Deep Space Connection Module</p>
           </div>
           
           <div className="h-6">
-            <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest min-h-[1em]">
+            <p className="text-rose-200/60 font-mono text-[10px] uppercase tracking-widest min-h-[1em]">
               {typewriterText}
               <span className="animate-pulse ml-1">_</span>
             </p>
@@ -1399,12 +1401,12 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
 
         <button 
           onClick={handleLogin}
-          className="group relative px-10 py-5 bg-white text-black font-bold rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-4 mx-auto overflow-hidden"
+          className="group relative px-10 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-4 mx-auto overflow-hidden shadow-[0_0_30px_rgba(251,113,133,0.15)] hover:shadow-[0_0_50px_rgba(251,113,133,0.3)]"
         >
-          <div className="absolute inset-0 bg-emerald-400 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          <span className="relative z-10 flex items-center gap-3 group-hover:text-black">
-            <TreeDeciduous className="w-5 h-5 rotate-45" />
-            <span className="tracking-widest uppercase text-sm">Establish Neural Link</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-500 to-indigo-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+          <span className="relative z-10 flex items-center gap-3">
+            <TreeDeciduous className="w-5 h-5 rotate-45 text-rose-300 group-hover:text-white transition-colors" />
+            <span className="tracking-widest uppercase text-sm">Initiate Shared Orbit</span>
           </span>
         </button>
 
@@ -1413,16 +1415,16 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
             href="https://privacy.vesta11.space" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-zinc-500 hover:text-emerald-400 text-[10px] font-mono uppercase tracking-widest transition-colors"
+            className="text-rose-200/40 hover:text-rose-300 text-[10px] font-mono uppercase tracking-widest transition-colors"
           >
             Privacy Policy
           </a>
-          <span className="text-zinc-800">•</span>
+          <span className="text-white/10">•</span>
           <a 
             href="https://terms.vesta11.space" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-zinc-500 hover:text-emerald-400 text-[10px] font-mono uppercase tracking-widest transition-colors"
+            className="text-rose-200/40 hover:text-rose-300 text-[10px] font-mono uppercase tracking-widest transition-colors"
           >
             Terms of Service
           </a>
@@ -1430,13 +1432,13 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
       </motion.div>
 
       {/* Decorative Elements */}
-      <div className="absolute bottom-12 left-12 flex flex-col gap-1 opacity-20 font-mono text-[8px] text-emerald-500">
+      <div className="absolute bottom-12 left-12 flex flex-col gap-1 opacity-40 font-mono text-[8px] text-rose-300">
         <span>LAT: 37.7749 N</span>
         <span>LNG: 122.4194 W</span>
       </div>
-      <div className="absolute bottom-12 right-12 flex flex-col gap-1 opacity-20 font-mono text-[8px] text-emerald-500 text-right">
+      <div className="absolute bottom-12 right-12 flex flex-col gap-1 opacity-40 font-mono text-[8px] text-rose-300 text-right">
         <span>CORE TEMP: 15.7M K</span>
-        <span>STATUS: FUSION STABLE</span>
+        <span>STATUS: HEARTS SYNCED</span>
       </div>
     </div>
   );
@@ -1448,7 +1450,7 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
   let rank = "Interstellar Dust";
   let nextRankSR = 500;
   let prevRankSR = 0;
-  let treeColor = "text-zinc-500";
+  let treeColor = "text-rose-200/40";
   let treeGlow = "";
   
   if (sr > 10000) {
@@ -1461,20 +1463,20 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
     rank = "Binary System";
     nextRankSR = 10000;
     prevRankSR = 5000;
-    treeColor = "text-emerald-300";
-    treeGlow = "drop-shadow-[0_0_10px_rgba(110,231,183,0.6)]";
+    treeColor = "text-rose-300";
+    treeGlow = "drop-shadow-[0_0_10px_rgba(253,164,175,0.6)]";
   } else if (sr > 2000) {
     rank = "Main Sequence";
     nextRankSR = 5000;
     prevRankSR = 2000;
-    treeColor = "text-emerald-400";
-    treeGlow = "drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]";
+    treeColor = "text-rose-400";
+    treeGlow = "drop-shadow-[0_0_8px_rgba(251,113,133,0.4)]";
   } else if (sr > 500) {
     rank = "Protostar";
     nextRankSR = 2000;
     prevRankSR = 500;
-    treeColor = "text-emerald-500";
-    treeGlow = "drop-shadow-[0_0_5px_rgba(16,185,129,0.2)]";
+    treeColor = "text-rose-500";
+    treeGlow = "drop-shadow-[0_0_5px_rgba(244,63,94,0.2)]";
   }
 
   const progressPercent = sr >= 10000 ? 100 : Math.max(0, Math.min(100, ((sr - prevRankSR) / (nextRankSR - prevRankSR)) * 100));
@@ -1482,27 +1484,27 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
   return (
     <div className="w-full flex flex-col">
       {/* Level Bar */}
-      <div className="w-full h-1 bg-zinc-900 relative overflow-hidden">
+      <div className="w-full h-1 bg-black/50 relative overflow-hidden">
         <motion.div 
-          className="absolute top-0 left-0 h-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-rose-500 to-indigo-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
         />
       </div>
       
-      <header className="border-b border-zinc-800 p-6 flex items-center justify-between max-w-7xl mx-auto w-full">
+      <header className="border-b border-white/10 p-6 flex items-center justify-between max-w-7xl mx-auto w-full bg-black/20 backdrop-blur-sm">
         <div className="flex items-center gap-4">
-          <div className={`w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center transition-all duration-1000 ${treeGlow}`}>
+          <div className={`w-10 h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center transition-all duration-1000 ${treeGlow}`}>
             <TreeDeciduous className={`w-5 h-5 transition-colors duration-1000 ${treeColor}`} />
           </div>
           <div>
             <h2 className="text-sm font-bold text-white tracking-tight uppercase italic">VESTA-11</h2>
             <div className="flex items-center gap-2">
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
+              <p className="text-[10px] text-rose-200/60 font-mono uppercase tracking-widest">
                 {profile?.role} // Room {profile?.role === 'Commander' ? '5' : '6'}
               </p>
-              <span className="text-[10px] text-emerald-500 font-mono uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] text-rose-400 font-mono uppercase tracking-widest bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
                 {rank} ({sr} SR)
               </span>
             </div>
@@ -1512,14 +1514,14 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
         <div className="flex items-center gap-4">
           <button 
             onClick={onSettingsClick}
-            className="p-2 text-zinc-500 hover:text-white transition-colors flex items-center gap-2 group"
+            className="p-2 text-rose-200/40 hover:text-rose-200 transition-colors flex items-center gap-2 group"
           >
             <span className="text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Settings</span>
             <Settings className="w-5 h-5" />
           </button>
           <button 
             onClick={() => signOut(auth)}
-            className="p-2 text-zinc-500 hover:text-white transition-colors"
+            className="p-2 text-rose-200/40 hover:text-rose-200 transition-colors"
           >
             <LogOut className="w-5 h-5" />
           </button>
@@ -1536,8 +1538,8 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
       className={cn(
         "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
         active 
-          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-          : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
+          ? "bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.1)]" 
+          : "text-rose-200/40 hover:text-rose-200 hover:bg-white/5"
       )}
     >
       {icon}
@@ -1616,10 +1618,10 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="flex flex-col h-full"
     >
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+      <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <Radio className="w-4 h-4 text-emerald-500 animate-pulse" />
-          <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Subspace Frequency: Active</span>
+          <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
+          <span className="text-xs font-mono uppercase tracking-widest text-rose-200/60">Subspace Frequency: Active</span>
         </div>
       </div>
 
@@ -1632,8 +1634,8 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
             <div className={cn(
               "max-w-[80%] p-4 rounded-2xl text-sm",
               msg.senderId === profile?.uid 
-                ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-50" 
-                : "bg-zinc-800/50 border border-zinc-700 text-zinc-300"
+                ? "bg-rose-500/10 border border-rose-500/20 text-rose-50 shadow-[0_0_15px_rgba(244,63,94,0.1)]" 
+                : "bg-black/40 border border-white/10 text-rose-100/80"
             )}>
               <p className="font-mono text-[10px] uppercase tracking-widest mb-2 opacity-50">
                 {msg.senderRole} // {msg.timestamp ? format(msg.timestamp.toDate(), 'HH:mm') : '...'}
@@ -1645,8 +1647,8 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
               <div className={cn(
                 "max-w-[90%] p-4 border rounded-xl text-xs italic",
                 msg.analysis.includes('QUANTUM ENTANGLEMENT ALERT')
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-                  : "bg-emerald-950/20 border-emerald-500/10 text-emerald-400/80"
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                  : "bg-rose-950/20 border-rose-500/10 text-rose-400/80"
               )}>
                 <div className="flex items-center gap-2 mb-2">
                   <Atom className={cn("w-3 h-3", msg.analysis.includes('QUANTUM ENTANGLEMENT ALERT') && "animate-spin")} />
@@ -1654,7 +1656,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
                     {msg.analysis.includes('QUANTUM ENTANGLEMENT ALERT') ? 'Entanglement Detected' : 'VESTA-11 Analysis'}
                   </span>
                 </div>
-                <div className="prose prose-invert prose-emerald text-xs leading-relaxed">
+                <div className="prose prose-invert prose-rose text-xs leading-relaxed">
                   <Markdown>
                     {msg.analysis}
                   </Markdown>
@@ -1665,16 +1667,16 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak }: { profile: Us
         ))}
       </div>
 
-      <form onSubmit={handleSend} className="p-4 bg-zinc-900/50 border-t border-zinc-800 flex gap-2">
+      <form onSubmit={handleSend} className="p-4 bg-black/20 backdrop-blur-sm border-t border-white/10 flex gap-2">
         <input 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Initiate brain dump..."
-          className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
+          className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-rose-500/50 transition-colors text-rose-50"
         />
         <button 
           disabled={sending}
-          className="p-2 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+          className="p-2 bg-gradient-to-r from-rose-500 to-indigo-500 text-white rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-[0_0_15px_rgba(244,63,94,0.3)]"
         >
           {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         </button>
@@ -1732,8 +1734,8 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
       className="p-6 space-y-8 h-full overflow-y-auto"
     >
       <div className="space-y-4">
-        <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-emerald-500" />
+        <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2 text-rose-50">
+          <ClipboardList className="w-5 h-5 text-rose-400" />
           Ship Maintenance Protocols
         </h3>
         
@@ -1743,9 +1745,9 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               placeholder="Define new protocol..."
-              className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50"
+              className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-rose-500/50 text-rose-50"
             />
-            <button className="px-4 py-2 bg-emerald-500 text-black font-bold rounded-xl text-xs uppercase">Add</button>
+            <button className="px-4 py-2 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-xl text-xs uppercase shadow-[0_0_15px_rgba(244,63,94,0.3)]">Add</button>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {['Life Support', 'Navigation', 'Nuclear Heart', 'Olive Grove'].map((cat) => (
@@ -1756,8 +1758,8 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
                 className={cn(
                   "px-3 py-1 rounded-full text-[10px] uppercase tracking-widest border transition-all whitespace-nowrap",
                   category === cat 
-                    ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400" 
-                    : "border-zinc-800 text-zinc-500 hover:border-zinc-700"
+                    ? "bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.2)]" 
+                    : "border-white/10 text-rose-200/40 hover:border-white/20 hover:text-rose-200/60"
                 )}
               >
                 {cat}
@@ -1775,22 +1777,22 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
             className={cn(
               "p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between group",
               task.status === 'completed' 
-                ? "bg-zinc-900/20 border-zinc-800/50 opacity-50" 
-                : "bg-zinc-900/50 border-zinc-800 hover:border-emerald-500/30"
+                ? "bg-black/20 border-white/5 opacity-50" 
+                : "bg-black/40 border-white/10 hover:border-rose-500/30 hover:shadow-[0_0_15px_rgba(244,63,94,0.1)]"
             )}
           >
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-5 h-5 rounded-full border flex items-center justify-center transition-colors",
-                task.status === 'completed' ? "bg-emerald-500 border-emerald-500" : "border-zinc-700 group-hover:border-emerald-500/50"
+                task.status === 'completed' ? "bg-rose-500 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "border-white/20 group-hover:border-rose-500/50"
               )}>
-                {task.status === 'completed' && <Zap className="w-3 h-3 text-black" />}
+                {task.status === 'completed' && <Zap className="w-3 h-3 text-white" />}
               </div>
               <div>
-                <p className={cn("text-sm font-medium", task.status === 'completed' && "line-through")}>
+                <p className={cn("text-sm font-medium text-rose-50", task.status === 'completed' && "line-through text-rose-200/40")}>
                   {task.title}
                 </p>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">
                   {task.category}
                 </p>
               </div>
@@ -1819,12 +1821,12 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
       className="p-6 space-y-8 h-full flex flex-col items-center justify-center relative overflow-hidden"
     >
       {/* Background Star Map (2026) */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent" />
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-rose-500/20 via-transparent to-transparent" />
         {[...Array(50)].map((_, i) => (
           <Star 
             key={i} 
-            className="absolute text-emerald-500/40 w-1 h-1"
+            className="absolute text-rose-500/40 w-1 h-1"
             style={{ 
               top: `${Math.random() * 100}%`, 
               left: `${Math.random() * 100}%`,
@@ -1835,52 +1837,52 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
       </div>
 
       <div className="text-center space-y-4 relative z-10">
-        <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center justify-center gap-3">
-          <Star className="w-6 h-6 text-emerald-500 animate-pulse" />
+        <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center justify-center gap-3 text-rose-50">
+          <Star className="w-6 h-6 text-rose-400 animate-pulse" />
           Stellar Parallax
         </h3>
-        <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest">Real-Time Orbital Alignment</p>
+        <p className="text-rose-200/40 font-mono text-[10px] uppercase tracking-widest">Real-Time Orbital Alignment</p>
       </div>
 
       <div className="relative w-64 h-64 flex items-center justify-center">
         {/* Singularity Map Overlay */}
         <motion.div 
           animate={{ rotate: rotation }}
-          className="absolute inset-0 border border-emerald-500/20 rounded-full flex items-center justify-center"
+          className="absolute inset-0 border border-rose-500/20 rounded-full flex items-center justify-center shadow-[inset_0_0_30px_rgba(244,63,94,0.1)]"
         >
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <Moon className="w-4 h-4 text-emerald-500/50" />
-            <span className="text-[8px] font-mono uppercase text-emerald-500/40 mt-1">Sagittarius // 2026</span>
+            <Moon className="w-4 h-4 text-rose-400/50" />
+            <span className="text-[8px] font-mono uppercase text-rose-400/40 mt-1">Sagittarius // 2026</span>
           </div>
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex flex-col items-center">
-            <Atom className="w-4 h-4 text-amber-500/30" />
-            <span className="text-[8px] font-mono uppercase text-amber-500/30 mt-1">Saturn-Neptune // Aries</span>
+            <Atom className="w-4 h-4 text-indigo-400/50" />
+            <span className="text-[8px] font-mono uppercase text-indigo-400/40 mt-1">Saturn-Neptune // Aries</span>
           </div>
         </motion.div>
 
         {/* Current Sky Map */}
         <motion.div 
           animate={{ rotate: rotation * -0.5 }}
-          className="w-48 h-48 border-2 border-emerald-500/40 rounded-full flex items-center justify-center relative"
+          className="w-48 h-48 border-2 border-rose-500/40 rounded-full flex items-center justify-center relative shadow-[0_0_30px_rgba(244,63,94,0.1)]"
         >
           <div className="absolute top-4 right-4 flex flex-col items-center">
-            <Moon className="w-6 h-6 text-emerald-400" />
-            <span className="text-[8px] font-mono uppercase text-emerald-400 mt-1">{moonData.phaseName}</span>
+            <Moon className="w-6 h-6 text-rose-300" />
+            <span className="text-[8px] font-mono uppercase text-rose-300 mt-1">{moonData.phaseName}</span>
           </div>
           
-          <Compass className="w-12 h-12 text-emerald-500/60" />
+          <Compass className="w-12 h-12 text-rose-500/60" />
         </motion.div>
       </div>
 
       <div className="max-w-md text-center space-y-4 relative z-10">
-        <p className="text-sm italic text-zinc-400 leading-relaxed">
+        <p className="text-sm italic text-rose-200/60 leading-relaxed">
           "The stars shift, but the coordinates of the Singularity remain fixed. We are navigating by the same light that hit the Olive Tree."
         </p>
-        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-emerald-500">
+        <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.05)]">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
             {otherPresence?.location ? 'Shared Sky Detected' : 'Scanning for Orbital Overlap...'}
           </p>
-          <p className="text-[9px] text-zinc-500 mt-1">
+          <p className="text-[9px] text-rose-200/40 mt-1">
             {getEmotionalDistance()}
           </p>
         </div>
@@ -1977,54 +1979,54 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
       className="p-6 space-y-8 h-full overflow-y-auto"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2">
-          <Archive className="w-5 h-5 text-emerald-500" />
+        <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2 text-rose-50">
+          <Archive className="w-5 h-5 text-rose-400" />
           The Olive Grove Archive
         </h3>
-        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-          <Star className="w-3 h-3 text-emerald-400" />
-          <span className="text-[10px] font-mono uppercase text-emerald-400">Singularity Map Active</span>
+        <div className="flex items-center gap-2 px-3 py-1 bg-rose-500/10 border border-rose-500/20 rounded-full shadow-[0_0_10px_rgba(244,63,94,0.1)]">
+          <Star className="w-3 h-3 text-rose-400" />
+          <span className="text-[10px] font-mono uppercase text-rose-400">Singularity Map Active</span>
         </div>
       </div>
 
       {/* Singularity Map Visual */}
-      <div className="p-8 bg-zinc-950 border border-zinc-800 rounded-3xl relative overflow-hidden">
+      <div className="p-8 bg-black/40 border border-white/10 rounded-3xl relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500/30 via-transparent to-transparent" />
-          <TreeDeciduous className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 text-emerald-900/50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-rose-500/30 via-transparent to-transparent" />
+          <TreeDeciduous className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 text-rose-900/50" />
         </div>
         
         <div className="relative z-10 grid grid-cols-2 gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <Moon className="w-6 h-6 text-emerald-400" />
+              <Moon className="w-6 h-6 text-rose-400" />
               <div>
-                <p className="text-[10px] font-mono uppercase text-zinc-500">Moon Position</p>
-                <p className="text-sm font-bold text-emerald-50">{SINGULARITY_SKY.moonSign}</p>
+                <p className="text-[10px] font-mono uppercase text-rose-200/40">Moon Position</p>
+                <p className="text-sm font-bold text-rose-50">{SINGULARITY_SKY.moonSign}</p>
               </div>
             </div>
-            <p className="text-xs italic text-zinc-400">"Unaligned horizons, discovery, philosophy. The dream of the stars."</p>
+            <p className="text-xs italic text-rose-200/60">"Unaligned horizons, discovery, philosophy. The dream of the stars."</p>
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <Atom className="w-6 h-6 text-amber-400" />
+              <Atom className="w-6 h-6 text-indigo-400" />
               <div>
-                <p className="text-[10px] font-mono uppercase text-zinc-500">Alignment</p>
-                <p className="text-sm font-bold text-amber-50">{SINGULARITY_SKY.conjunction}</p>
+                <p className="text-[10px] font-mono uppercase text-rose-200/40">Alignment</p>
+                <p className="text-sm font-bold text-indigo-50">{SINGULARITY_SKY.conjunction}</p>
               </div>
             </div>
-            <p className="text-xs italic text-zinc-400">"Quantum Node of dissolution and new beginnings. The Nuclear Heart."</p>
+            <p className="text-xs italic text-rose-200/60">"Quantum Node of dissolution and new beginnings. The Nuclear Heart."</p>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-4 border-b border-zinc-800 pb-2">
+      <div className="flex gap-4 border-b border-white/10 pb-2">
         <button
           onClick={() => setActiveTab('entries')}
           className={cn(
             "text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-colors",
-            activeTab === 'entries' ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-500 hover:text-zinc-400"
+            activeTab === 'entries' ? "border-rose-500 text-rose-400" : "border-transparent text-rose-200/40 hover:text-rose-200/60"
           )}
         >
           Cosmic Coordinates
@@ -2033,7 +2035,7 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
           onClick={() => setActiveTab('pulses')}
           className={cn(
             "text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-colors",
-            activeTab === 'pulses' ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-500 hover:text-zinc-400"
+            activeTab === 'pulses' ? "border-rose-500 text-rose-400" : "border-transparent text-rose-200/40 hover:text-rose-200/60"
           )}
         >
           Fusion Pulses
@@ -2042,8 +2044,8 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
 
       {activeTab === 'entries' && (
         <div className="space-y-8">
-          <form onSubmit={handleArchive} className="space-y-4 bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl">
-            <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+          <form onSubmit={handleArchive} className="space-y-4 bg-black/20 border border-white/10 p-6 rounded-2xl backdrop-blur-sm">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-rose-400 flex items-center gap-2">
               <Lock className="w-4 h-4" />
               Encrypt New Entry
             </h4>
@@ -2051,18 +2053,18 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Entry Title..."
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50"
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500/50 text-rose-50"
             />
             <textarea
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
               placeholder="Write your poem or message to be encrypted in the silver leaves..."
-              className="w-full h-32 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50 resize-none"
+              className="w-full h-32 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500/50 resize-none text-rose-50"
             />
             <button 
               type="submit"
               disabled={!newTitle.trim() || !newContent.trim()}
-              className="w-full py-3 bg-emerald-500 text-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(244,63,94,0.3)]"
             >
               Archive to 11-Master Frequency
             </button>
@@ -2072,17 +2074,17 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
             {entries.map((entry) => {
               const isDecrypted = decryptedIds.has(entry.id);
               return (
-                <div key={entry.id} className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl relative overflow-hidden group">
+                <div key={entry.id} className="p-6 bg-black/40 border border-white/10 rounded-2xl relative overflow-hidden group hover:border-rose-500/30 transition-colors">
                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <TreeDeciduous className="w-24 h-24" />
+                    <TreeDeciduous className="w-24 h-24 text-rose-500" />
                   </div>
                   
                   <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-500">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-rose-400">
                       <MapPin className="w-3 h-3" />
                       {entry.coordinates}
                     </div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-rose-200/40">
                       <Clock className="w-3 h-3 inline mr-1" />
                       {entry.createdAt ? format(entry.createdAt.toDate(), 'dd.MM.yyyy // HH:mm') : '...'}
                     </div>
@@ -2090,19 +2092,19 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
 
                   <div className="relative z-10 space-y-4">
                     <h5 className="text-lg font-bold text-white">{isDecrypted ? entry.title : scrambleText(entry.title)}</h5>
-                    <div className="prose prose-invert prose-emerald text-sm italic font-serif leading-relaxed">
+                    <div className="prose prose-invert prose-rose text-sm italic font-serif leading-relaxed">
                       <Markdown>
                         {isDecrypted ? entry.content : scrambleText(entry.content)}
                       </Markdown>
                     </div>
                     
-                    <div className="pt-4 border-t border-zinc-800/50 flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase text-zinc-500">
+                    <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-rose-200/40">
                         Author: {entry.authorRole}
                       </span>
                       <button
                         onClick={() => toggleDecryption(entry.id)}
-                        className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+                        className="text-[10px] font-mono uppercase tracking-widest text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1"
                       >
                         {isDecrypted ? <Lock className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
                         {isDecrypted ? 'Encrypt' : 'Attune to 11-Master'}
@@ -2113,7 +2115,7 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
               );
             })}
             {entries.length === 0 && (
-              <p className="text-center text-zinc-500 text-xs italic py-8">No entries found in the Olive Grove Archive.</p>
+              <p className="text-center text-rose-200/40 text-xs italic py-8">No entries found in the Olive Grove Archive.</p>
             )}
           </div>
         </div>
@@ -2122,18 +2124,18 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
       {activeTab === 'pulses' && (
         <div className="grid grid-cols-1 gap-6">
           {pulses.map((pulse) => (
-            <div key={pulse.id} className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl relative overflow-hidden group">
+            <div key={pulse.id} className="p-6 bg-black/40 border border-white/10 rounded-2xl relative overflow-hidden group hover:border-rose-500/30 transition-colors">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <TreeDeciduous className="w-24 h-24" />
+                <TreeDeciduous className="w-24 h-24 text-rose-500" />
               </div>
               
-              <div className="flex items-center gap-2 mb-4 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+              <div className="flex items-center gap-2 mb-4 text-[10px] font-mono uppercase tracking-[0.2em] text-rose-200/40">
                 <Clock className="w-3 h-3" />
                 {pulse.timestamp ? format(pulse.timestamp.toDate(), 'dd.MM.yyyy // HH:mm') : '...'}
               </div>
 
               <div className="relative z-10">
-                <div className="prose prose-invert prose-emerald text-lg italic font-serif leading-relaxed">
+                <div className="prose prose-invert prose-rose text-lg italic font-serif leading-relaxed">
                   <Markdown>
                     {pulse.poem}
                   </Markdown>
@@ -2142,7 +2144,7 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
             </div>
           ))}
           {pulses.length === 0 && (
-            <p className="text-center text-zinc-500 text-xs italic py-8">No fusion pulses recorded yet.</p>
+            <p className="text-center text-rose-200/40 text-xs italic py-8">No fusion pulses recorded yet.</p>
           )}
         </div>
       )}
@@ -2245,7 +2247,7 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
                   opacity: [0, 1, 0.8, 1, 0]
                 }}
                 transition={{ duration: 4, ease: "easeInOut" }}
-                className="w-64 h-64 bg-emerald-500 rounded-full blur-[100px]"
+                className="w-64 h-64 bg-rose-500 rounded-full blur-[100px]"
               />
               <motion.div 
                 initial={{ scale: 0 }}
@@ -2253,8 +2255,8 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
                 className="absolute inset-0 flex flex-col items-center justify-center text-center"
               >
                 <Atom className="w-24 h-24 text-white animate-spin-slow mb-4" />
-                <h2 className="text-4xl font-bold italic text-white tracking-tighter uppercase">Nuclear Fusion</h2>
-                <p className="text-emerald-400 font-mono text-sm tracking-widest mt-2">SYNCHRONIZATION COMPLETE</p>
+                <h2 className="text-4xl font-bold italic text-white tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]">Nuclear Fusion</h2>
+                <p className="text-rose-400 font-mono text-sm tracking-widest mt-2 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]">SYNCHRONIZATION COMPLETE</p>
               </motion.div>
             </div>
           </motion.div>
@@ -2265,19 +2267,19 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
         onClick={triggerPulseAttempt}
         disabled={fusing}
         className={cn(
-          "w-full aspect-square rounded-full border-2 flex flex-col items-center justify-center gap-2 transition-all group relative overflow-hidden",
+          "w-full aspect-square rounded-full border-2 flex flex-col items-center justify-center gap-2 transition-all group relative overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.3)]",
           fusing 
-            ? "border-emerald-500 bg-emerald-500/20 animate-pulse" 
-            : "border-zinc-800 hover:border-emerald-500/50 hover:bg-emerald-500/5"
+            ? "border-rose-500 bg-rose-500/20 animate-pulse shadow-[0_0_30px_rgba(244,63,94,0.3)]" 
+            : "border-white/10 hover:border-rose-500/50 hover:bg-rose-500/5 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] bg-black/40 backdrop-blur-sm"
         )}
       >
         <TreeDeciduous className={cn(
           "w-12 h-12 transition-transform",
-          fusing ? "scale-125 text-emerald-400" : "text-zinc-700 group-hover:text-emerald-500/50"
+          fusing ? "scale-125 text-rose-400" : "text-rose-900/50 group-hover:text-rose-500/50"
         )} />
         <span className={cn(
           "text-[10px] font-mono uppercase tracking-[0.3em]",
-          fusing ? "text-emerald-400" : "text-zinc-600 group-hover:text-emerald-500/50"
+          fusing ? "text-rose-400" : "text-rose-200/40 group-hover:text-rose-500/50"
         )}>
           {fusing ? 'Syncing...' : 'Nuclear Fusion'}
         </span>
@@ -2287,14 +2289,14 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 2, opacity: 0.5 }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="absolute inset-0 bg-emerald-500 rounded-full blur-2xl"
+            className="absolute inset-0 bg-rose-500 rounded-full blur-2xl"
           />
         )}
       </button>
       
       <div className="text-center">
-        <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-600">
-          Sync status: <span className="text-emerald-500/50">Optimal</span>
+        <p className="text-[9px] font-mono uppercase tracking-widest text-rose-200/40">
+          Sync status: <span className="text-rose-500/50">Optimal</span>
         </p>
       </div>
     </div>
