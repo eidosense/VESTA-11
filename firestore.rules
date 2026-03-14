@@ -95,7 +95,9 @@ service cloud.firestore {
     // Tasks
     match /tasks/{taskId} {
       allow read: if isMember(resource.data.vesselId);
-      allow create, update, delete: if isMember(request.resource.data.vesselId || resource.data.vesselId);
+      allow create: if isMember(request.resource.data.vesselId);
+      allow update: if isMember(resource.data.vesselId) && request.resource.data.vesselId == resource.data.vesselId;
+      allow delete: if isMember(resource.data.vesselId);
     }
 
     // Fusion Pulses
@@ -112,7 +114,9 @@ service cloud.firestore {
     // Focus Sessions
     match /focus_sessions/{sessionId} {
       allow read: if isMember(resource.data.vesselId);
-      allow create, update, delete: if isMember(request.resource.data.vesselId || resource.data.vesselId);
+      allow create: if isMember(request.resource.data.vesselId);
+      allow update: if isMember(resource.data.vesselId) && request.resource.data.vesselId == resource.data.vesselId;
+      allow delete: if isMember(resource.data.vesselId);
     }
 
     // Secrets

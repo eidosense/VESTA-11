@@ -492,9 +492,13 @@ export default function App() {
     }, 4000);
 
     // Update DB
-    await updateDoc(doc(db, 'vessels', profile.vesselId), {
-      sr: increment(amount)
-    });
+    try {
+      await updateDoc(doc(db, 'vessels', profile.vesselId), {
+        sr: increment(amount)
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `vessels/${profile.vesselId}`);
+    }
   };
 
   const updateStreak = async () => {
@@ -516,17 +520,21 @@ export default function App() {
       }
     }
     
-    await updateDoc(doc(db, 'vessels', profile.vesselId), {
-      streakDays: newStreak,
-      lastSyncDate: today
-    });
-    
-    if (newStreak === 3) {
-      addSR(500, "SUPERNOVA EVENT: 3-Day Entanglement Streak!");
-      setLaunchMessage("SUPERNOVA EVENT: Your minds are perfectly entangled. The universe sings an epic ballad in your honor.");
-      setTimeout(() => setLaunchMessage(null), 10000);
-    } else {
-      addSR(20, `Entanglement Streak: Day ${newStreak}`);
+    try {
+      await updateDoc(doc(db, 'vessels', profile.vesselId), {
+        streakDays: newStreak,
+        lastSyncDate: today
+      });
+      
+      if (newStreak === 3) {
+        addSR(500, "SUPERNOVA EVENT: 3-Day Entanglement Streak!");
+        setLaunchMessage("SUPERNOVA EVENT: Your minds are perfectly entangled. The universe sings an epic ballad in your honor.");
+        setTimeout(() => setLaunchMessage(null), 10000);
+      } else {
+        addSR(20, `Entanglement Streak: Day ${newStreak}`);
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `vessels/${profile.vesselId}`);
     }
   };
 
@@ -972,18 +980,26 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
 
   const startSession = async () => {
     if (!topic.trim() || !profile?.vesselId) return;
-    await addDoc(collection(db, 'focus_sessions'), {
-      vesselId: profile.vesselId,
-      active: true,
-      startTime: serverTimestamp(),
-      participants: [profile?.uid],
-      topic
-    });
+    try {
+      await addDoc(collection(db, 'focus_sessions'), {
+        vesselId: profile.vesselId,
+        active: true,
+        startTime: serverTimestamp(),
+        participants: [profile?.uid],
+        topic
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'focus_sessions');
+    }
   };
 
   const endSession = async () => {
     if (session) {
-      await deleteDoc(doc(db, 'focus_sessions', session.id));
+      try {
+        await deleteDoc(doc(db, 'focus_sessions', session.id));
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `focus_sessions/${session.id}`);
+      }
     }
   };
 
@@ -1102,16 +1118,20 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
 
   const sendSecret = async () => {
     if (!newSecret.trim() || !profile?.vesselId) return;
-    await addDoc(collection(db, 'secrets'), {
-      vesselId: profile.vesselId,
-      senderId: profile?.uid,
-      content: newSecret,
-      createdAt: serverTimestamp(),
-      halfLifeHours: halfLife,
-      status: 'active'
-    });
-    addSR(20, "Half-Life Secret Shared");
-    setNewSecret('');
+    try {
+      await addDoc(collection(db, 'secrets'), {
+        vesselId: profile.vesselId,
+        senderId: profile?.uid,
+        content: newSecret,
+        createdAt: serverTimestamp(),
+        halfLifeHours: halfLife,
+        status: 'active'
+      });
+      addSR(20, "Half-Life Secret Shared");
+      setNewSecret('');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'secrets');
+    }
   };
 
   const getDecayLevel = (secret: Secret) => {
@@ -1881,25 +1901,33 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim() || !profile?.vesselId) return;
-    await addDoc(collection(db, 'tasks'), {
-      vesselId: profile.vesselId,
-      title: newTask,
-      status: 'pending',
-      category,
-      createdAt: serverTimestamp(),
-      assignedTo: profile?.uid
-    });
-    setNewTask('');
+    try {
+      await addDoc(collection(db, 'tasks'), {
+        vesselId: profile.vesselId,
+        title: newTask,
+        status: 'pending',
+        category,
+        createdAt: serverTimestamp(),
+        assignedTo: profile?.uid
+      });
+      setNewTask('');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'tasks');
+    }
   };
 
   const toggleTask = async (task: Task) => {
     const isCompleting = task.status === 'pending';
-    await updateDoc(doc(db, 'tasks', task.id), {
-      status: isCompleting ? 'completed' : 'pending'
-    });
-    
-    if (isCompleting && task.category === 'Life Support') {
-      addSR(10, "Life Support Task Completed");
+    try {
+      await updateDoc(doc(db, 'tasks', task.id), {
+        status: isCompleting ? 'completed' : 'pending'
+      });
+      
+      if (isCompleting && task.category === 'Life Support') {
+        addSR(10, "Life Support Task Completed");
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `tasks/${task.id}`);
     }
   };
 
@@ -2529,11 +2557,15 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
     if (fusing || !profile?.vesselId) return;
     
     // Record our attempt
-    await addDoc(collection(db, 'pulse_attempts'), {
-      vesselId: profile.vesselId,
-      uid: profile.uid,
-      timestamp: serverTimestamp()
-    });
+    try {
+      await addDoc(collection(db, 'pulse_attempts'), {
+        vesselId: profile.vesselId,
+        uid: profile.uid,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'pulse_attempts');
+    }
     
     setFusing(true);
     setTimeout(() => setFusing(false), 5000);
