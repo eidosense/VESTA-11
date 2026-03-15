@@ -796,124 +796,142 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-rose-50/90 font-sans selection:bg-rose-500/30 relative">
-      {/* 11.03.2026 Star Map Background Layer */}
-      <div 
-        className="fixed inset-0 pointer-events-none opacity-60 z-0 animate-slow-pan"
-        style={{ 
-          backgroundImage: `url('${bgImage || 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop'}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'brightness(0.6) contrast(1.1)'
-        }}
-      />
-      <div className="fixed inset-0 bg-gradient-to-b from-indigo-950/60 via-purple-900/30 to-black/90 z-0" />
+    <div className="min-h-screen bg-[#050505] text-rose-50/90 font-sans selection:bg-rose-500/30 relative overflow-hidden">
+      {/* Deep Space Background with Radial Gradient */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-950/40 via-black to-black" />
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-40 animate-slow-pan"
+          style={{ 
+            backgroundImage: `url('${bgImage || 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop'}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'brightness(0.5) contrast(1.2)'
+          }}
+        />
+      </div>
+      
       <CosmicDust />
 
-      <div className="relative z-10">
+      <div className="relative z-10 h-screen flex flex-col">
         <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
         
-        <main className="max-w-md mx-auto h-[100dvh] flex flex-col relative">
-          {/* Content Area */}
-          <section className="flex-1 overflow-hidden relative pb-24">
+        <main className="flex-1 overflow-y-auto relative pb-32 scroll-smooth">
+          <div className="max-w-md mx-auto px-4">
             {skyContext?.current?.resonance?.active && (
-              <div className="absolute top-0 left-0 right-0 z-50 bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 flex items-center gap-3">
+              <div className="sticky top-0 z-50 bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 flex items-center gap-3 backdrop-blur-md rounded-b-xl mb-4">
                 <Zap className="w-3 h-3 text-rose-400 animate-pulse" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
                   {skyContext.current.resonance.message}
                 </span>
               </div>
             )}
+            
             <AnimatePresence mode="wait">
-              {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
-              {activeTab === 'astront' && <AstrontView profile={profile} />}
-              {activeTab === 'space' && <SpaceView />}
-              {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
-              {activeTab === 'art' && <ArtView profile={profile} />}
-              {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {activeTab === 'space' && <SpaceView />}
+                {activeTab === 'astront' && <AstrontView profile={profile} />}
+                {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
+                {activeTab === 'art' && <ArtView profile={profile} />}
+                {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
+                {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
+              </motion.div>
             </AnimatePresence>
-          </section>
-
-          {/* Bottom Navigation Bar */}
-          <div className="fixed bottom-24 right-6 z-50">
-            <FusionButton profile={profile} addSR={addSR} />
           </div>
-          <nav className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 pb-safe z-50">
-            <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between relative">
-              <button
-                onClick={() => {
-                  audioService.playClick();
-                  setActiveTab('time-warp');
-                }}
-                className={cn(
-                  "flex flex-col items-center gap-1 transition-colors",
-                  activeTab === 'time-warp' ? "text-rose-400" : "text-white/40 hover:text-white/60"
-                )}
-              >
-                <Clock className="w-6 h-6" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">Warp</span>
-              </button>
-              
-              <button
-                onClick={() => {
-                  audioService.playClick();
-                  setActiveTab('astront');
-                }}
-                className={cn(
-                  "flex flex-col items-center gap-1 transition-colors",
-                  activeTab === 'astront' ? "text-indigo-400" : "text-white/40 hover:text-white/60"
-                )}
-              >
-                <Sparkles className="w-6 h-6" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">11-Bit</span>
-              </button>
+        </main>
 
-              {/* Center Home Button (Space) */}
-              <div className="relative -top-6">
-                <button
-                  onClick={() => {
-                    audioService.playClick();
-                    setActiveTab('space');
-                  }}
-                  className={cn(
-                    "w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-transform active:scale-95",
-                    activeTab === 'space' ? "bg-gradient-to-tr from-zinc-800 to-zinc-600 border-2 border-white/50" : "bg-black border border-white/20"
-                  )}
-                >
-                  <TreeDeciduous className={cn("w-8 h-8", activeTab === 'space' ? "text-white" : "text-white/60")} />
-                </button>
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-mono uppercase tracking-widest text-white/60">
-                  Space
-                </div>
-              </div>
+        {/* Bottom Navigation Bar */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl border-t border-white/5 pb-safe z-50">
+          <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between relative">
+            {/* Space */}
+            <button
+              onClick={() => {
+                audioService.playClick();
+                setActiveTab('space');
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300",
+                activeTab === 'space' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <Rocket className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">Space</span>
+            </button>
 
+            {/* Astronaut */}
+            <button
+              onClick={() => {
+                audioService.playClick();
+                setActiveTab('astront');
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300",
+                activeTab === 'astront' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <User className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">Astronaut</span>
+            </button>
+
+            {/* Nuclear Fusion Pulse (Center) */}
+            <div className="relative -top-6">
+              <div className="absolute inset-0 bg-rose-500/20 blur-2xl rounded-full animate-pulse" />
               <button
                 onClick={() => {
-                  audioService.playClick();
+                  audioService.playFusion();
                   setActiveTab('parallax');
                 }}
                 className={cn(
-                  "flex flex-col items-center gap-1 transition-colors",
-                  activeTab === 'parallax' ? "text-emerald-400" : "text-white/40 hover:text-white/60"
+                  "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 relative z-10",
+                  "bg-gradient-to-br from-rose-500 to-indigo-600 shadow-[0_0_30px_rgba(244,63,94,0.4)]",
+                  "hover:shadow-[0_0_50px_rgba(244,63,94,0.6)] hover:scale-110 active:scale-95",
+                  activeTab === 'parallax' ? "border-2 border-white" : "border border-white/20"
                 )}
               >
-                <Navigation className="w-6 h-6" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">Star</span>
+                <Zap className="w-8 h-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
               </button>
-
-              <button
-                onClick={() => setActiveTab('art')}
-                className={cn(
-                  "flex flex-col items-center gap-1 transition-colors",
-                  activeTab === 'art' ? "text-fuchsia-400" : "text-white/40 hover:text-white/60"
-                )}
-              >
-                <Palette className="w-6 h-6" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">Art</span>
-              </button>
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-mono uppercase tracking-[0.2em] text-rose-400 font-bold whitespace-nowrap">
+                Star
+              </div>
             </div>
-          </nav>
-        </main>
+
+            {/* Art */}
+            <button
+              onClick={() => {
+                audioService.playClick();
+                setActiveTab('art');
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300",
+                activeTab === 'art' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <Palette className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">Art</span>
+            </button>
+
+            {/* Time Warp */}
+            <button
+              onClick={() => {
+                audioService.playClick();
+                setActiveTab('time-warp');
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300",
+                activeTab === 'time-warp' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <Clock className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">Warp</span>
+            </button>
+          </div>
+        </nav>
 
         <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] text-rose-200/40 font-mono flex items-center gap-4">
           <span>Singularity: 11.03.2026</span>
