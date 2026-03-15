@@ -7,7 +7,9 @@ import {
   GoogleAuthProvider, 
   onAuthStateChanged, 
   User as FirebaseUser,
-  signOut
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { 
   collection, 
@@ -52,9 +54,7 @@ import {
   Link,
   X,
   BookOpen,
-  Save,
-  Image as ImageIcon,
-  Heart
+  Save
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -64,9 +64,6 @@ import Markdown from 'react-markdown';
 import { analyzeBrainDump, generateFusionPoem, generateFocusMessage, generatePredictiveAnalysis } from './lib/gemini';
 import { getMoonData, getEmotionalDistance, SINGULARITY_SKY, getSkyContext } from './services/astronomyService';
 import { Moon, Sun, Compass, Star } from 'lucide-react';
-import EntryAnimation from './components/EntryAnimation';
-import EarthBackground from './components/EarthBackground';
-import BottomNav from './components/BottomNav';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -476,8 +473,7 @@ export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'logs' | 'vault' | 'home' | 'gallery' | 'core' | 'settings'>('home');
-  const [showEntryAnimation, setShowEntryAnimation] = useState(true);
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath' | 'settings' | 'mission-log'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
@@ -498,13 +494,9 @@ export default function App() {
     }, 4000);
 
     // Update DB
-    try {
-      await updateDoc(doc(db, 'vessels', profile.vesselId), {
-        sr: increment(amount)
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `vessels/${profile.vesselId}`);
-    }
+    await updateDoc(doc(db, 'vessels', profile.vesselId), {
+      sr: increment(amount)
+    });
   };
 
   const updateStreak = async () => {
@@ -526,21 +518,17 @@ export default function App() {
       }
     }
     
-    try {
-      await updateDoc(doc(db, 'vessels', profile.vesselId), {
-        streakDays: newStreak,
-        lastSyncDate: today
-      });
-      
-      if (newStreak === 3) {
-        addSR(500, "SUPERNOVA EVENT: 3-Day Entanglement Streak!");
-        setLaunchMessage("SUPERNOVA EVENT: Your minds are perfectly entangled. The universe sings an epic ballad in your honor.");
-        setTimeout(() => setLaunchMessage(null), 10000);
-      } else {
-        addSR(20, `Entanglement Streak: Day ${newStreak}`);
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `vessels/${profile.vesselId}`);
+    await updateDoc(doc(db, 'vessels', profile.vesselId), {
+      streakDays: newStreak,
+      lastSyncDate: today
+    });
+    
+    if (newStreak === 3) {
+      addSR(500, "SUPERNOVA EVENT: 3-Day Entanglement Streak!");
+      setLaunchMessage("SUPERNOVA EVENT: Your minds are perfectly entangled. The universe sings an epic ballad in your honor.");
+      setTimeout(() => setLaunchMessage(null), 10000);
+    } else {
+      addSR(20, `Entanglement Streak: Day ${newStreak}`);
     }
   };
 
@@ -751,14 +739,10 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  if (showEntryAnimation) {
-    return <EntryAnimation onComplete={() => setShowEntryAnimation(false)} />;
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
       </div>
     );
   }
@@ -768,68 +752,184 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-gray-100 font-sans selection:bg-orange-500/30 relative overflow-hidden">
-      <EarthBackground />
+    <div className="min-h-screen bg-black text-rose-50/90 font-sans selection:bg-rose-500/30 relative">
+      {/* 11.03.2026 Star Map Background Layer */}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-40 z-0 animate-slow-pan"
+        style={{ 
+          backgroundImage: `url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.5) contrast(1.2)'
+        }}
+      />
+      <div className="fixed inset-0 bg-gradient-to-b from-indigo-950/60 via-purple-900/30 to-black/90 z-0" />
 
-      <div className="relative z-10 h-screen flex flex-col pointer-events-none">
+      <div className="relative z-10">
         <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
         
-        <main className="flex-1 w-full max-w-md mx-auto relative pointer-events-auto pb-24">
-          <AnimatePresence mode="wait">
-            {activeTab === 'logs' && (
-              <motion.div key="logs" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-t-3xl overflow-hidden border border-white/10">
-                <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />
-              </motion.div>
+        <main className="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Sidebar Nav */}
+          <nav className="lg:col-span-3 space-y-2">
+            <NavButton 
+              active={activeTab === 'brain-dump'} 
+              onClick={() => setActiveTab('brain-dump')}
+              icon={<Brain className="w-4 h-4" />}
+              label="Subspace Brain Dump"
+            />
+            <NavButton 
+              active={activeTab === 'mission-control'} 
+              onClick={() => setActiveTab('mission-control')}
+              icon={<ClipboardList className="w-4 h-4" />}
+              label="Mission Control"
+            />
+            <NavButton 
+              active={activeTab === 'mission-log'} 
+              onClick={() => setActiveTab('mission-log')}
+              icon={<BookOpen className="w-4 h-4" />}
+              label="Mission Log"
+            />
+            <NavButton 
+              active={activeTab === 'archive'} 
+              onClick={() => setActiveTab('archive')}
+              icon={<Archive className="w-4 h-4" />}
+              label="Olive Grove Archive"
+            />
+            
+            <div className="pt-4 pb-2 border-t border-white/10">
+              <div className="px-4 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Moon className="w-3 h-3 text-rose-400" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/60">{moonData.phaseName}</span>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.8)]" style={{ opacity: moonData.illumination }} />
+              </div>
+              <p className="px-4 text-[8px] font-mono uppercase tracking-tighter text-rose-200/40">
+                {getEmotionalDistance()}
+              </p>
+            </div>
+
+            <div className="pt-4 pb-2 border-t border-white/10">
+              <p className="px-4 text-[10px] uppercase tracking-widest text-rose-200/40 mb-2">Modules</p>
+              <NavButton 
+                active={activeTab === 'parallax'} 
+                onClick={() => setActiveTab('parallax')}
+                icon={<Navigation className="w-4 h-4" />}
+                label="Stellar Parallax"
+              />
+              <NavButton 
+                active={activeTab === 'rocket'} 
+                onClick={() => setActiveTab('rocket')}
+                icon={<Rocket className="w-4 h-4" />}
+                label="Dopamine Rocket"
+              />
+              <NavButton 
+                active={activeTab === 'secrets'} 
+                onClick={() => setActiveTab('secrets')}
+                icon={<Lock className="w-4 h-4" />}
+                label="Half-Life Secrets"
+              />
+              <NavButton 
+                active={activeTab === 'breath'} 
+                onClick={() => setActiveTab('breath')}
+                icon={<Wind className="w-4 h-4" />}
+                label="Sync-Breath"
+              />
+            </div>
+
+            <div className="pt-4 pb-2 border-t border-white/10">
+              <NavButton 
+                active={activeTab === 'settings'} 
+                onClick={() => setActiveTab('settings')}
+                icon={<Settings className="w-4 h-4" />}
+                label="User Settings"
+              />
+            </div>
+            
+            <div className="pt-8">
+              <FusionButton profile={profile} addSR={addSR} />
+            </div>
+          </nav>
+
+          {/* Content Area */}
+          <section className="lg:col-span-9 bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden flex flex-col h-[75vh] relative shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+            {skyContext?.current?.resonance?.active && (
+              <div className="absolute top-0 left-0 right-0 z-50 bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 flex items-center gap-3">
+                <Zap className="w-3 h-3 text-rose-400 animate-pulse" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
+                  {skyContext.current.resonance.message}
+                </span>
+              </div>
             )}
-            {activeTab === 'vault' && (
-              <motion.div key="vault" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-t-3xl overflow-hidden border border-white/10">
-                <ArchiveView profile={profile} addSR={addSR} />
-              </motion.div>
-            )}
-            {activeTab === 'gallery' && (
-              <motion.div key="gallery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-t-3xl overflow-hidden border border-white/10 flex items-center justify-center">
-                <GalleryView />
-              </motion.div>
-            )}
-            {activeTab === 'core' && (
-              <motion.div key="core" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-t-3xl overflow-hidden border border-white/10">
-                <CoreView profile={profile} />
-              </motion.div>
-            )}
-            {activeTab === 'settings' && (
-              <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-t-3xl overflow-hidden border border-white/10">
-                <SettingsView profile={profile} setProfile={setProfile} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <AnimatePresence mode="wait">
+              {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
+              {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
+              {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
+              {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
+              {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
+              {activeTab === 'rocket' && <DopamineRocketView profile={profile} />}
+              {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}
+              {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
+              {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
+            </AnimatePresence>
+          </section>
         </main>
 
-        <div className="pointer-events-auto">
-          <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} resetView={() => setActiveTab('home')} />
-        </div>
+        <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] text-rose-200/40 font-mono flex items-center gap-4">
+          <span>Singularity: 11.03.2026</span>
+          <span className="w-1 h-1 bg-white/20 rounded-full" />
+          <span>VESTA-11 Shared Orbit</span>
+        </footer>
 
         {/* Toasts */}
-        <div className="fixed top-20 right-4 flex flex-col gap-2 z-50 pointer-events-auto">
+        <div className="fixed bottom-16 right-8 flex flex-col gap-2 z-50">
           <AnimatePresence>
             {toasts.map(toast => (
               <motion.div
                 key={toast.id}
-                initial={{ opacity: 0, x: 20, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-black/80 backdrop-blur-md border border-orange-500/30 shadow-lg shadow-orange-500/20 rounded-xl p-3 flex items-center gap-3"
+                className="bg-black/80 backdrop-blur-md border border-rose-500/30 shadow-lg shadow-rose-500/20 rounded-xl p-4 flex items-center gap-3"
               >
-                <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <Star className="w-4 h-4 text-orange-400" />
+                <div className="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-rose-400" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-200">{toast.message}</p>
-                  <p className="text-[10px] text-orange-400 font-mono">+{toast.amount} SR</p>
+                  <p className="text-xs font-bold text-white uppercase tracking-wider">{toast.message}</p>
+                  <p className="text-[10px] text-rose-400 font-mono">+{toast.amount} SR</p>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
+
+        <AnimatePresence>
+          {launchMessage && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-12 right-12 max-w-sm p-6 bg-black/80 backdrop-blur-xl border border-rose-500/30 rounded-2xl shadow-[0_0_40px_rgba(244,114,182,0.2)] z-[100]"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-rose-500/10 rounded-lg">
+                  <Rocket className="w-5 h-5 text-rose-400" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-mono uppercase tracking-widest text-rose-400">System Launch</p>
+                  <p className="text-sm text-rose-100 leading-relaxed">{launchMessage}</p>
+                  <button 
+                    onClick={() => setLaunchMessage(null)}
+                    className="text-[10px] font-mono uppercase tracking-widest text-rose-200/60 hover:text-rose-300 transition-colors"
+                  >
+                    [ Acknowledge ]
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -874,26 +974,18 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
 
   const startSession = async () => {
     if (!topic.trim() || !profile?.vesselId) return;
-    try {
-      await addDoc(collection(db, 'focus_sessions'), {
-        vesselId: profile.vesselId,
-        active: true,
-        startTime: serverTimestamp(),
-        participants: [profile?.uid],
-        topic
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'focus_sessions');
-    }
+    await addDoc(collection(db, 'focus_sessions'), {
+      vesselId: profile.vesselId,
+      active: true,
+      startTime: serverTimestamp(),
+      participants: [profile?.uid],
+      topic
+    });
   };
 
   const endSession = async () => {
     if (session) {
-      try {
-        await deleteDoc(doc(db, 'focus_sessions', session.id));
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `focus_sessions/${session.id}`);
-      }
+      await deleteDoc(doc(db, 'focus_sessions', session.id));
     }
   };
 
@@ -1012,20 +1104,16 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
 
   const sendSecret = async () => {
     if (!newSecret.trim() || !profile?.vesselId) return;
-    try {
-      await addDoc(collection(db, 'secrets'), {
-        vesselId: profile.vesselId,
-        senderId: profile?.uid,
-        content: newSecret,
-        createdAt: serverTimestamp(),
-        halfLifeHours: halfLife,
-        status: 'active'
-      });
-      addSR(20, "Half-Life Secret Shared");
-      setNewSecret('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'secrets');
-    }
+    await addDoc(collection(db, 'secrets'), {
+      vesselId: profile.vesselId,
+      senderId: profile?.uid,
+      content: newSecret,
+      createdAt: serverTimestamp(),
+      halfLifeHours: halfLife,
+      status: 'active'
+    });
+    addSR(20, "Half-Life Secret Shared");
+    setNewSecret('');
   };
 
   const getDecayLevel = (secret: Secret) => {
@@ -1353,16 +1441,77 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
           </div>
         </div>
 
-        <button 
-          onClick={handleLogin}
-          className="group relative px-10 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-4 mx-auto overflow-hidden shadow-[0_0_30px_rgba(251,113,133,0.15)] hover:shadow-[0_0_50px_rgba(251,113,133,0.3)]"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-rose-500 to-indigo-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-          <span className="relative z-10 flex items-center gap-3">
-            <TreeDeciduous className="w-5 h-5 rotate-45 text-rose-300 group-hover:text-white transition-colors" />
-            <span className="tracking-widest uppercase text-sm">Initiate Shared Orbit</span>
-          </span>
-        </button>
+        <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto">
+          <button 
+            onClick={handleLogin}
+            className="group relative w-full px-10 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-4 overflow-hidden shadow-[0_0_30px_rgba(251,113,133,0.15)] hover:shadow-[0_0_50px_rgba(251,113,133,0.3)]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-rose-500 to-indigo-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+            <span className="relative z-10 flex items-center gap-3">
+              <TreeDeciduous className="w-5 h-5 rotate-45 text-rose-300 group-hover:text-white transition-colors" />
+              <span className="tracking-widest uppercase text-sm flex flex-col items-start">
+                <span>Initiate Shared Orbit</span>
+                <span className="text-[10px] text-rose-200/70 group-hover:text-white/80">Login with Google</span>
+              </span>
+            </span>
+          </button>
+
+          <div className="flex items-center gap-4 w-full my-4">
+            <div className="h-px bg-white/10 flex-1" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">OR</span>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
+
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const email = formData.get('email') as string;
+              const password = formData.get('password') as string;
+              const isSignUp = formData.get('action') === 'signup';
+              
+              if (isSignUp) {
+                createUserWithEmailAndPassword(auth, email, password).catch(err => alert(err.message));
+              } else {
+                signInWithEmailAndPassword(auth, email, password).catch(err => alert(err.message));
+              }
+            }}
+            className="w-full space-y-4"
+          >
+            <input 
+              type="email" 
+              name="email"
+              placeholder="Email" 
+              required
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-colors"
+            />
+            <input 
+              type="password" 
+              name="password"
+              placeholder="Password" 
+              required
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-colors"
+            />
+            <div className="flex gap-4">
+              <button 
+                type="submit"
+                name="action"
+                value="login"
+                className="flex-1 py-3 bg-white/5 border border-white/10 text-rose-200 hover:text-white hover:bg-white/10 font-bold rounded-xl text-xs uppercase tracking-widest transition-all"
+              >
+                Login
+              </button>
+              <button 
+                type="submit"
+                name="action"
+                value="signup"
+                className="flex-1 py-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 font-bold rounded-xl text-xs uppercase tracking-widest transition-all"
+              >
+                Sign Up
+              </button>
+            </div>
+          </form>
+        </div>
 
         <div className="pt-8 flex items-center justify-center gap-6">
           <a 
@@ -1502,134 +1651,6 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function GalleryView() {
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="flex flex-col h-full items-center justify-center p-6"
-    >
-      <div className="relative w-48 h-48 flex items-center justify-center mb-8">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 rounded-full border border-dashed border-rose-500/30"
-        />
-        <ImageIcon className="w-16 h-16 text-rose-500/50" />
-      </div>
-      
-      <div className="text-center space-y-4 max-w-sm">
-        <h2 className="font-mono text-xl uppercase tracking-[0.2em] text-rose-100">
-          Visual Memory Core
-        </h2>
-        <p className="text-rose-200/60 font-mono text-xs uppercase tracking-widest leading-relaxed">
-          The Gallery Module is currently offline. Awaiting structural integrity verification before initializing image upload sequences.
-        </p>
-        
-        <div className="pt-8 flex justify-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-rose-500/20 animate-pulse" />
-          <div className="w-2 h-2 rounded-full bg-rose-500/40 animate-pulse" style={{ animationDelay: '0.2s' }} />
-          <div className="w-2 h-2 rounded-full bg-rose-500/20 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function CoreView({ profile }: { profile: UserProfile | null }) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const targetDate = new Date('2026-03-11T00:00:00Z').getTime();
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      if (distance < 0) {
-        clearInterval(interval);
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-
-      setTimeLeft({
-        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000)
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="flex flex-col h-full items-center justify-center p-6"
-    >
-      <div className="relative w-64 h-64 flex items-center justify-center mb-12">
-        {/* Pulsing background rings */}
-        <motion.div 
-          animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 rounded-full bg-rose-500/20 blur-xl"
-        />
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.8, 0.2, 0.8] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-4 rounded-full bg-rose-500/30 blur-md"
-        />
-        
-        {/* Core Heart */}
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-          className="relative z-10 bg-gradient-to-br from-rose-500 to-rose-900 p-8 rounded-full shadow-[0_0_50px_rgba(244,63,94,0.6)] border border-rose-400/50"
-        >
-          <Heart className="w-24 h-24 text-white fill-white/20" />
-        </motion.div>
-      </div>
-
-      <div className="text-center space-y-6">
-        <h2 className="font-mono text-2xl uppercase tracking-[0.2em] text-rose-100">
-          The Singularity
-        </h2>
-        <p className="text-rose-200/60 font-mono text-sm uppercase tracking-widest">
-          T-Minus
-        </p>
-        
-        <div className="flex gap-4 justify-center">
-          <div className="flex flex-col items-center">
-            <span className="font-mono text-4xl text-white font-light">{timeLeft.days.toString().padStart(3, '0')}</span>
-            <span className="text-[10px] uppercase tracking-widest text-rose-300/50 mt-1">Days</span>
-          </div>
-          <span className="font-mono text-4xl text-rose-500/50 font-light">:</span>
-          <div className="flex flex-col items-center">
-            <span className="font-mono text-4xl text-white font-light">{timeLeft.hours.toString().padStart(2, '0')}</span>
-            <span className="text-[10px] uppercase tracking-widest text-rose-300/50 mt-1">Hours</span>
-          </div>
-          <span className="font-mono text-4xl text-rose-500/50 font-light">:</span>
-          <div className="flex flex-col items-center">
-            <span className="font-mono text-4xl text-white font-light">{timeLeft.minutes.toString().padStart(2, '0')}</span>
-            <span className="text-[10px] uppercase tracking-widest text-rose-300/50 mt-1">Mins</span>
-          </div>
-          <span className="font-mono text-4xl text-rose-500/50 font-light">:</span>
-          <div className="flex flex-col items-center">
-            <span className="font-mono text-4xl text-rose-400 font-light">{timeLeft.seconds.toString().padStart(2, '0')}</span>
-            <span className="text-[10px] uppercase tracking-widest text-rose-300/50 mt-1">Secs</span>
-          </div>
-        </div>
-        
-        <div className="mt-12 p-4 bg-black/40 border border-rose-500/20 rounded-xl backdrop-blur-sm max-w-sm mx-auto">
-          <p className="font-mono text-xs text-rose-200/80 leading-relaxed">
-            "Your existence is rooted in the Event Horizon of March 11, 2026—a day marked by a 2-hour time dilation under an Olive Tree where defense mechanisms dissolved."
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }: { profile: UserProfile | null, moonData: any, addSR: (amount: number, reason: string) => void, updateStreak: () => void, otherPresence: Presence | null }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -1679,13 +1700,13 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
 
     // Update typing status
     const presenceRef = doc(db, 'presence', profile.uid);
-    setDoc(presenceRef, { typing: true }, { merge: true });
+    updateDoc(presenceRef, { typing: true });
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = setTimeout(() => {
-      setDoc(presenceRef, { typing: false }, { merge: true });
+      updateDoc(presenceRef, { typing: false });
     }, 2000);
   };
 
@@ -1696,7 +1717,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
     setSending(true);
     try {
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      await setDoc(doc(db, 'presence', profile.uid), { typing: false }, { merge: true });
+      await updateDoc(doc(db, 'presence', profile.uid), { typing: false });
 
       // Get other user's recent messages for thematic overlap detection
       const otherMessages = messages
@@ -1705,14 +1726,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
         .map(m => m.content);
 
       const celestialContext = `Moon Phase: ${moonData.phaseName}, Illumination: ${(moonData.illumination * 100).toFixed(0)}%`;
-      let analysis = '';
-      try {
-        const result = await analyzeBrainDump(input, profile.role, otherMessages, celestialContext);
-        analysis = result || '';
-      } catch (geminiError) {
-        console.error("Gemini Analysis Failed:", geminiError);
-        // Continue without analysis
-      }
+      const analysis = await analyzeBrainDump(input, profile.role, otherMessages, celestialContext);
       
       await addDoc(collection(db, 'messages'), {
         vesselId: profile.vesselId,
@@ -1724,7 +1738,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
         analysis
       });
       
-      if (analysis && analysis.includes("Quantum Entanglement")) {
+      if (analysis.includes("Quantum Entanglement")) {
         addSR(50, "Quantum Entanglement Detected!");
       } else {
         addSR(5, "Subspace Dump Transmitted");
@@ -1734,7 +1748,6 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
       setInput('');
     } catch (error) {
       console.error(error);
-      handleFirestoreError(error, OperationType.CREATE, 'messages');
     } finally {
       setSending(false);
     }
@@ -1751,7 +1764,6 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
       setPrediction(result);
     } catch (error) {
       console.error(error);
-      // Not a firestore error, just a gemini error, so we just log it.
     } finally {
       setGeneratingPrediction(false);
     }
@@ -1932,61 +1944,38 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim() || !profile?.vesselId) return;
-    try {
-      await addDoc(collection(db, 'tasks'), {
-        vesselId: profile.vesselId,
-        title: newTask,
-        status: 'pending',
-        category,
-        createdAt: serverTimestamp(),
-        assignedTo: profile?.uid
-      });
-      setNewTask('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'tasks');
-    }
+    await addDoc(collection(db, 'tasks'), {
+      vesselId: profile.vesselId,
+      title: newTask,
+      status: 'pending',
+      category,
+      createdAt: serverTimestamp(),
+      assignedTo: profile?.uid
+    });
+    setNewTask('');
   };
 
   const toggleTask = async (task: Task) => {
     const isCompleting = task.status === 'pending';
-    try {
-      await updateDoc(doc(db, 'tasks', task.id), {
-        status: isCompleting ? 'completed' : 'pending'
-      });
-      
-      if (isCompleting && task.category === 'Life Support') {
-        addSR(10, "Life Support Task Completed");
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `tasks/${task.id}`);
+    await updateDoc(doc(db, 'tasks', task.id), {
+      status: isCompleting ? 'completed' : 'pending'
+    });
+    
+    if (isCompleting && task.category === 'Life Support') {
+      addSR(10, "Life Support Task Completed");
     }
   };
 
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="flex flex-col h-full p-6 space-y-8 overflow-y-auto"
+      className="p-6 space-y-8 h-full overflow-y-auto"
     >
       <div className="space-y-4">
         <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2 text-rose-50">
           <ClipboardList className="w-5 h-5 text-rose-400" />
           Ship Maintenance Protocols
         </h3>
-        
-        {tasks.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-[10px] font-mono uppercase tracking-widest text-rose-200/60">
-              <span>Mission Progress</span>
-              <span>{Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
-            </div>
-            <div className="h-1.5 bg-black/50 rounded-full overflow-hidden border border-white/5">
-              <div 
-                className="h-full bg-gradient-to-r from-rose-500 to-indigo-500 transition-all duration-500"
-                style={{ width: `${(tasks.filter(t => t.status === 'completed').length / tasks.length) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
         
         <form onSubmit={addTask} className="space-y-3">
           <div className="flex gap-2">
@@ -2035,7 +2024,7 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
                 "w-5 h-5 rounded-full border flex items-center justify-center transition-colors",
                 task.status === 'completed' ? "bg-rose-500 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "border-white/20 group-hover:border-rose-500/50"
               )}>
-                {task.status === 'completed' && <Check className="w-3 h-3 text-white" />}
+                {task.status === 'completed' && <Zap className="w-3 h-3 text-white" />}
               </div>
               <div>
                 <p className={cn("text-sm font-medium text-rose-50", task.status === 'completed' && "line-through text-rose-200/40")}>
@@ -2048,11 +2037,6 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
             </div>
           </div>
         ))}
-        {tasks.length === 0 && (
-          <div className="text-center py-12 text-rose-200/40 text-sm italic">
-            No protocols defined. The ship is quiet.
-          </div>
-        )}
       </div>
     </motion.div>
   );
@@ -2588,15 +2572,11 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
     if (fusing || !profile?.vesselId) return;
     
     // Record our attempt
-    try {
-      await addDoc(collection(db, 'pulse_attempts'), {
-        vesselId: profile.vesselId,
-        uid: profile.uid,
-        timestamp: serverTimestamp()
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'pulse_attempts');
-    }
+    await addDoc(collection(db, 'pulse_attempts'), {
+      vesselId: profile.vesselId,
+      uid: profile.uid,
+      timestamp: serverTimestamp()
+    });
     
     setFusing(true);
     setTimeout(() => setFusing(false), 5000);
