@@ -72,8 +72,10 @@ import AstrontView from './components/AstrontView';
 import TimeWarpView from './components/TimeWarpView';
 import SpaceView from './components/SpaceView';
 import ArtView from './components/ArtView';
+import FusionAnimation from './components/FusionAnimation';
 
 import { audioService } from './services/audioService';
+import { generateBackground } from './services/imageService';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -484,6 +486,8 @@ export default function App() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const [showFusion, setShowFusion] = useState(false);
+  const [bgImage, setBgImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'art'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
@@ -565,10 +569,31 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const loadBg = async () => {
+      try {
+        const img = await generateBackground();
+        if (img) setBgImage(img);
+      } catch (e) {
+        console.error("Failed to generate background", e);
+      }
+    };
+    loadBg();
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
+        // Trigger fusion animation for Hayden
+        if (firebaseUser.email === 'Haydena.forster@gmail.com') {
+          const hasSeenFusion = sessionStorage.getItem('fusion_seen');
+          if (!hasSeenFusion) {
+            setShowFusion(true);
+            sessionStorage.setItem('fusion_seen', 'true');
+          }
+        }
+
         // Check for invite token in URL
         const urlParams = new URLSearchParams(window.location.search);
         const inviteToken = urlParams.get('invite');
@@ -762,6 +787,10 @@ export default function App() {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
+  if (showFusion) {
+    return <FusionAnimation onComplete={() => setShowFusion(false)} />;
+  }
+
   if (!user) {
     return <LoginScreen moonData={moonData} inviteError={inviteError} />;
   }
@@ -770,12 +799,12 @@ export default function App() {
     <div className="min-h-screen bg-black text-rose-50/90 font-sans selection:bg-rose-500/30 relative">
       {/* 11.03.2026 Star Map Background Layer */}
       <div 
-        className="fixed inset-0 pointer-events-none opacity-40 z-0 animate-slow-pan"
+        className="fixed inset-0 pointer-events-none opacity-60 z-0 animate-slow-pan"
         style={{ 
-          backgroundImage: `url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop')`,
+          backgroundImage: `url('${bgImage || 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop'}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'brightness(0.5) contrast(1.2)'
+          filter: 'brightness(0.6) contrast(1.1)'
         }}
       />
       <div className="fixed inset-0 bg-gradient-to-b from-indigo-950/60 via-purple-900/30 to-black/90 z-0" />
@@ -1486,7 +1515,7 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
         className="absolute inset-0 bg-cover bg-center opacity-60 scale-110 animate-slow-pan"
         style={{ 
           backgroundImage: `url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop')`,
-          filter: `brightness(${0.6 * coreBrightness}) contrast(1.2) saturate(1.5)`
+          filter: `brightness(${0.6 * coreBrightness}) contrast(1.1) saturate(1.2)`
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/40 via-purple-900/40 to-black/90" />
@@ -1554,62 +1583,6 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
               </span>
             </span>
           </button>
-
-          <div className="flex items-center gap-4 w-full my-4">
-            <div className="h-px bg-white/10 flex-1" />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">OR</span>
-            <div className="h-px bg-white/10 flex-1" />
-          </div>
-
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const email = formData.get('email') as string;
-              const password = formData.get('password') as string;
-              const isSignUp = formData.get('action') === 'signup';
-              
-              if (isSignUp) {
-                createUserWithEmailAndPassword(auth, email, password).catch(err => alert(err.message));
-              } else {
-                signInWithEmailAndPassword(auth, email, password).catch(err => alert(err.message));
-              }
-            }}
-            className="w-full space-y-4"
-          >
-            <input 
-              type="email" 
-              name="email"
-              placeholder="Email" 
-              required
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-colors"
-            />
-            <input 
-              type="password" 
-              name="password"
-              placeholder="Password" 
-              required
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-colors"
-            />
-            <div className="flex gap-4">
-              <button 
-                type="submit"
-                name="action"
-                value="login"
-                className="flex-1 py-3 bg-white/5 border border-white/10 text-rose-200 hover:text-white hover:bg-white/10 font-bold rounded-xl text-xs uppercase tracking-widest transition-all"
-              >
-                Login
-              </button>
-              <button 
-                type="submit"
-                name="action"
-                value="signup"
-                className="flex-1 py-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 font-bold rounded-xl text-xs uppercase tracking-widest transition-all"
-              >
-                Sign Up
-              </button>
-            </div>
-          </form>
         </div>
 
         <div className="pt-8 flex items-center justify-center gap-6">

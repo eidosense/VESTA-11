@@ -1,233 +1,39 @@
 {
   "entities": {
-    "User": {
+    "users": {
       "title": "User",
-      "description": "A crew member of VESTA-11",
+      "description": "User profile information",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
         "email": { "type": "string" },
-        "role": { "type": "string", "enum": ["Commander", "Lead Engineer"] },
         "displayName": { "type": "string" },
-        "lastActive": { "type": "string", "format": "date-time" }
+        "photoURL": { "type": "string" },
+        "lastLogin": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "email", "role"]
+      "required": ["uid", "email"]
     },
-    "Message": {
-      "title": "Message",
-      "description": "Subspace brain dump or communication",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "senderId": { "type": "string" },
-        "content": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "type": { "type": "string", "enum": ["brain-dump", "poem", "alert"] },
-        "analysis": { "type": "string" }
-      },
-      "required": ["vesselId", "senderId", "content", "timestamp"]
-    },
-    "Task": {
-      "title": "Task",
-      "description": "Ship maintenance or calibration task",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "title": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "completed"] },
-        "assignedTo": { "type": "string" },
-        "category": { "type": "string", "enum": ["Life Support", "Navigation", "Nuclear Heart", "Olive Grove"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["vesselId", "title", "status", "category"]
-    },
-    "FusionPulse": {
-      "title": "FusionPulse",
-      "description": "Simultaneous connection event",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "participants": { "type": "array", "items": { "type": "string" } },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "poem": { "type": "string" }
-      },
-      "required": ["vesselId", "participants", "timestamp"]
-    },
-    "FocusSession": {
-      "title": "FocusSession",
-      "description": "Shared ADHD focus session",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "active": { "type": "boolean" },
-        "startTime": { "type": "string", "format": "date-time" },
-        "participants": { "type": "array", "items": { "type": "string" } },
-        "topic": { "type": "string" }
-      },
-      "required": ["vesselId", "active", "startTime"]
-    },
-    "Secret": {
-      "title": "Secret",
-      "description": "A decaying message with a half-life",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "senderId": { "type": "string" },
-        "content": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "halfLifeHours": { "type": "number" },
-        "status": { "type": "string", "enum": ["active", "decayed", "unlocked"] }
-      },
-      "required": ["vesselId", "senderId", "content", "createdAt", "halfLifeHours"]
-    },
-    "Presence": {
-      "title": "Presence",
-      "description": "User online status and location",
-      "type": "object",
-      "properties": {
-        "uid": { "type": "string" },
-        "lastSeen": { "type": "string", "format": "date-time" },
-        "location": {
-          "type": "object",
-          "properties": {
-            "lat": { "type": "number" },
-            "lng": { "type": "number" }
-          }
-        },
-        "breathing": { "type": "boolean" }
-      },
-      "required": ["uid", "lastSeen"]
-    },
-    "Vessel": {
-      "title": "Vessel",
-      "description": "A shared space for exactly two users",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "members": { "type": "array", "items": { "type": "string" } },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "members"]
-    },
-    "Invitation": {
-      "title": "Invitation",
-      "description": "A one-time link to join a vessel",
-      "type": "object",
-      "properties": {
-        "token": { "type": "string" },
-        "vesselId": { "type": "string" },
-        "used": { "type": "boolean" },
-        "expiresAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["token", "vesselId", "used"]
-    },
-    "ArchiveEntry": {
-      "title": "ArchiveEntry",
-      "description": "Encrypted poems and messages in the Olive Grove Archive",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "authorId": { "type": "string" },
-        "authorRole": { "type": "string" },
-        "content": { "type": "string" },
-        "title": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "coordinates": { "type": "string" },
-        "isEncrypted": { "type": "boolean" }
-      },
-      "required": ["vesselId", "authorId", "authorRole", "content", "title", "createdAt", "coordinates", "isEncrypted"]
-    },
-    "MissionLog": {
-      "title": "MissionLog",
-      "description": "Daily activities, observations, and personal thoughts of astronauts",
-      "type": "object",
-      "properties": {
-        "vesselId": { "type": "string" },
-        "astronautId": { "type": "string" },
-        "astronautRole": { "type": "string" },
-        "content": { "type": "string" },
-        "type": { "type": "string", "enum": ["activity", "observation", "thought"] },
-        "timestamp": { "type": "string", "format": "date-time" }
-      },
-      "required": ["vesselId", "astronautId", "astronautRole", "content", "type", "timestamp"]
-    },
-    "Memory": {
+    "memories": {
       "title": "Memory",
-      "description": "Shared mind palace notes and art",
+      "description": "Shared memories or notes",
       "type": "object",
       "properties": {
-        "author": { "type": "string" },
         "content": { "type": "string" },
-        "imageUrl": { "type": "string" },
-        "type": { "type": "string", "enum": ["note", "art"] },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["author", "type", "createdAt"]
-    },
-    "TimelineEvent": {
-      "title": "TimelineEvent",
-      "description": "Key dates in Hayden and Arya's story",
-      "type": "object",
-      "properties": {
-        "event_date": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" }
-      },
-      "required": ["event_date", "title", "description"]
+      "required": ["content", "authorId"]
     }
   },
   "firestore": {
+    "/users/{uid}": {
+      "schema": "users",
+      "description": "User profiles"
+    },
     "/memories/{memoryId}": {
-      "schema": "Memory",
-      "description": "Shared mind palace notes and art"
-    },
-    "/timeline/{eventId}": {
-      "schema": "TimelineEvent",
-      "description": "Key dates in Hayden and Arya's story"
-    },
-    "/missionLogs/{logId}": {
-      "schema": "MissionLog",
-      "description": "Mission logs for astronauts"
-    },
-    "/archive_entries/{entryId}": {
-      "schema": "ArchiveEntry",
-      "description": "Encrypted poems and messages in the Olive Grove Archive"
-    },
-    "/users/{userId}": {
-      "schema": "User",
-      "description": "User profile data"
-    },
-    "/vessels/{vesselId}": {
-      "schema": "Vessel",
-      "description": "Shared vessel data"
-    },
-    "/invitations/{tokenId}": {
-      "schema": "Invitation",
-      "description": "One-time invitation tokens"
-    },
-    "/messages/{messageId}": {
-      "schema": "Message",
-      "description": "Communication logs"
-    },
-    "/tasks/{taskId}": {
-      "schema": "Task",
-      "description": "Mission tasks"
-    },
-    "/pulses/{pulseId}": {
-      "schema": "FusionPulse",
-      "description": "Fusion event logs"
-    },
-    "/focus_sessions/{sessionId}": {
-      "schema": "FocusSession",
-      "description": "ADHD focus sessions"
-    },
-    "/secrets/{secretId}": {
-      "schema": "Secret",
-      "description": "Decaying secrets"
-    },
-    "/presence/{userId}": {
-      "schema": "Presence",
-      "description": "User presence and location"
+      "schema": "memories",
+      "description": "Shared memories"
     }
   }
 }
