@@ -1302,6 +1302,107 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
   );
 }
 
+function OnboardingAnimation() {
+  return (
+    <div className="relative w-64 h-64 mx-auto flex items-center justify-center overflow-visible">
+      {/* Number 5 -> 1 -> Astronaut */}
+      <motion.div
+        className="absolute flex items-center justify-center"
+        animate={{
+          x: [-100, -15, -15, -25, -25],
+          y: [50, 0, 0, -120, -150],
+          rotate: [-45, 0, 0, 0, 0],
+          opacity: [0, 1, 1, 1, 0],
+          scale: [0.5, 1, 1.2, 1, 0.8]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.33, 0.5, 0.8, 1],
+          ease: "easeInOut"
+        }}
+      >
+        <motion.div
+          animate={{ opacity: [1, 1, 0, 0, 0], scale: [1, 1, 0.5, 0.5, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.8, 1] }}
+          className="text-6xl font-bold italic text-rose-400 absolute"
+        >
+          5
+        </motion.div>
+        <motion.div
+          animate={{ opacity: [0, 0, 1, 0, 0], scale: [0.5, 0.5, 1, 1.5, 1.5] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.55, 1] }}
+          className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(251,113,133,0.8)] absolute"
+        >
+          1
+        </motion.div>
+        <motion.div
+          animate={{ opacity: [0, 0, 0, 1, 1], scale: [0.5, 0.5, 0.5, 1, 1] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.45, 0.55, 0.65, 1] }}
+          className="absolute"
+        >
+          <User className="w-12 h-12 text-rose-300 drop-shadow-[0_0_15px_rgba(251,113,133,0.8)]" />
+        </motion.div>
+      </motion.div>
+
+      {/* Number 6 -> 1 -> Astronaut */}
+      <motion.div
+        className="absolute flex items-center justify-center"
+        animate={{
+          x: [100, 15, 15, 25, 25],
+          y: [-50, 0, 0, -120, -150],
+          rotate: [45, 0, 0, 0, 0],
+          opacity: [0, 1, 1, 1, 0],
+          scale: [0.5, 1, 1.2, 1, 0.8]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.33, 0.5, 0.8, 1],
+          ease: "easeInOut"
+        }}
+      >
+        <motion.div
+          animate={{ opacity: [1, 1, 0, 0, 0], scale: [1, 1, 0.5, 0.5, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.8, 1] }}
+          className="text-6xl font-bold italic text-indigo-400 absolute"
+        >
+          6
+        </motion.div>
+        <motion.div
+          animate={{ opacity: [0, 0, 1, 0, 0], scale: [0.5, 0.5, 1, 1.5, 1.5] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.55, 1] }}
+          className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(129,140,248,0.8)] absolute"
+        >
+          1
+        </motion.div>
+        <motion.div
+          animate={{ opacity: [0, 0, 0, 1, 1], scale: [0.5, 0.5, 0.5, 1, 1] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.45, 0.55, 0.65, 1] }}
+          className="absolute"
+        >
+          <User className="w-12 h-12 text-indigo-300 drop-shadow-[0_0_15px_rgba(129,140,248,0.8)]" />
+        </motion.div>
+      </motion.div>
+      
+      {/* Nuclear Core pulse when they merge */}
+      <motion.div
+        className="absolute w-48 h-48 bg-fuchsia-500/20 rounded-full blur-2xl"
+        animate={{
+          scale: [0, 0, 1.2, 0, 0],
+          opacity: [0, 0, 1, 0, 0]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.3, 0.4, 0.6, 1],
+          ease: "easeInOut"
+        }}
+      />
+    </div>
+  );
+}
+
 function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: string | null }) {
   const [typewriterText, setTypewriterText] = useState('');
   const fullText = "System check... Heartbeat synchronized. Navigation Locked. 11:03 is active.";
@@ -1359,61 +1460,7 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
           </motion.div>
 
           {/* Logo Container */}
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="relative w-64 h-64 mx-auto"
-          >
-            {/* The Logo (SVG Representation of the requested surreal logo) */}
-            <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_30px_rgba(244,114,182,0.4)]">
-              <defs>
-                <radialGradient id="coreGradient">
-                  <stop offset="0%" stopColor="#fb7185" />
-                  <stop offset="100%" stopColor="#4c1d95" />
-                </radialGradient>
-                <filter id="dust">
-                  <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
-                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
-                </filter>
-              </defs>
-              
-              {/* Nuclear Core */}
-              <circle cx="100" cy="140" r="15" fill="url(#coreGradient)" className="animate-pulse" />
-              <circle cx="100" cy="140" r="20" fill="none" stroke="#fb7185" strokeWidth="0.5" strokeDasharray="4 2" />
-              
-              {/* Trunk & Branches forming '11' */}
-              <path 
-                d="M100 140 L100 100 M85 100 L85 60 M115 100 L115 60" 
-                stroke="#fb7185" 
-                strokeWidth="4" 
-                strokeLinecap="round"
-                fill="none"
-              />
-              
-              {/* Flourishing Branches */}
-              <path 
-                d="M85 80 Q60 70 50 40 M115 80 Q140 70 150 40 M100 100 Q100 70 100 30" 
-                stroke="#be123c" 
-                strokeWidth="2" 
-                fill="none"
-              />
-
-              {/* Cosmic Dust Leaves (Silver-Rose) */}
-              <g filter="url(#dust)">
-                {[...Array(20)].map((_, i) => (
-                  <circle 
-                    key={i}
-                    cx={70 + Math.random() * 60} 
-                    cy={30 + Math.random() * 60} 
-                    r={1 + Math.random() * 2} 
-                    fill={i % 2 === 0 ? "#e0e7ff" : "#fb7185"} 
-                    className="animate-pulse"
-                    style={{ animationDelay: `${i * 0.2}s` }}
-                  />
-                ))}
-              </g>
-            </svg>
-          </motion.div>
+          <OnboardingAnimation />
         </div>
         
         <div className="space-y-4">
