@@ -38,6 +38,7 @@ export default function TimeWarpView({ profile }: { profile: any }) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [newMemory, setNewMemory] = useState('');
   const [saving, setSaving] = useState(false);
+  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Mock Coordinates
   const aryaCoords = { lat: 37.7749, lng: -122.4194 }; // SF
@@ -75,13 +76,13 @@ export default function TimeWarpView({ profile }: { profile: any }) {
     return () => unsubscribe();
   }, [profile]);
 
-  const handleSaveMemory = async () => {
-    if (!newMemory.trim() || !profile) return;
+  const handleSaveMemory = async (contentToSave: string) => {
+    if (!contentToSave.trim() || !profile) return;
     setSaving(true);
     try {
       await addDoc(collection(db, 'memories'), {
         author: profile.displayName || profile.role,
-        content: newMemory,
+        content: contentToSave,
         type: 'note',
         createdAt: serverTimestamp()
       });
@@ -90,6 +91,19 @@ export default function TimeWarpView({ profile }: { profile: any }) {
       console.error("Error saving memory:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setNewMemory(val);
+    
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    
+    if (val.trim()) {
+      saveTimeoutRef.current = setTimeout(() => {
+        handleSaveMemory(val);
+      }, 2000); // Auto-save after 2 seconds of inactivity
     }
   };
 
@@ -192,21 +206,19 @@ export default function TimeWarpView({ profile }: { profile: any }) {
             )}
           </div>
 
-          <div className="space-y-4 mt-auto">
+          <div className="space-y-4 mt-auto relative">
             <textarea
               value={newMemory}
-              onChange={(e) => setNewMemory(e.target.value)}
-              placeholder="Deposit a thought into the shared mind..."
+              onChange={handleInputChange}
+              placeholder="Deposit a thought into the shared mind... (Auto-saves on pause)"
               className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-fuchsia-500/50 transition-colors resize-none h-24"
             />
-            <button
-              onClick={handleSaveMemory}
-              disabled={saving || !newMemory.trim()}
-              className="w-full py-3 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 font-bold rounded-xl uppercase tracking-widest hover:bg-fuchsia-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Save to Palace
-            </button>
+            {saving && (
+              <div className="absolute top-2 right-4 flex items-center gap-2 text-[10px] font-mono uppercase text-fuchsia-400">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Capturing Spark...
+              </div>
+            )}
           </div>
         </div>
 

@@ -56,7 +56,8 @@ import {
   BookOpen,
   Save,
   Sparkles,
-  Palette
+  Palette,
+  Leaf
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -775,97 +776,9 @@ export default function App() {
       <div className="relative z-10">
         <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
         
-        <main className="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sidebar Nav */}
-          <nav className="lg:col-span-3 space-y-2">
-            <NavButton 
-              active={activeTab === 'brain-dump'} 
-              onClick={() => setActiveTab('brain-dump')}
-              icon={<Brain className="w-4 h-4" />}
-              label="Subspace Brain Dump"
-            />
-            <NavButton 
-              active={activeTab === 'astront'} 
-              onClick={() => setActiveTab('astront')}
-              icon={<Sparkles className="w-4 h-4" />}
-              label="Astront Briefing"
-            />
-            <NavButton 
-              active={activeTab === 'time-warp'} 
-              onClick={() => setActiveTab('time-warp')}
-              icon={<Clock className="w-4 h-4" />}
-              label="Zaman Bükülmesi"
-            />
-            <NavButton 
-              active={activeTab === 'space'} 
-              onClick={() => setActiveTab('space')}
-              icon={<Rocket className="w-4 h-4" />}
-              label="Orbital Space"
-            />
-            <NavButton 
-              active={activeTab === 'art'} 
-              onClick={() => setActiveTab('art')}
-              icon={<Palette className="w-4 h-4" />}
-              label="Olive Grove Archive"
-            />
-            <NavButton 
-              active={activeTab === 'mission-log'} 
-              onClick={() => setActiveTab('mission-log')}
-              icon={<BookOpen className="w-4 h-4" />}
-              label="Mission Log"
-            />
-            
-            <div className="pt-4 pb-2 border-t border-white/10">
-              <div className="px-4 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Moon className="w-3 h-3 text-rose-400" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/60">{moonData.phaseName}</span>
-                </div>
-                <div className="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.8)]" style={{ opacity: moonData.illumination }} />
-              </div>
-              <p className="px-4 text-[8px] font-mono uppercase tracking-tighter text-rose-200/40">
-                {getEmotionalDistance()}
-              </p>
-            </div>
-
-            <div className="pt-4 pb-2 border-t border-white/10">
-              <p className="px-4 text-[10px] uppercase tracking-widest text-rose-200/40 mb-2">Modules</p>
-              <NavButton 
-                active={activeTab === 'parallax'} 
-                onClick={() => setActiveTab('parallax')}
-                icon={<Navigation className="w-4 h-4" />}
-                label="Stellar Parallax"
-              />
-              <NavButton 
-                active={activeTab === 'secrets'} 
-                onClick={() => setActiveTab('secrets')}
-                icon={<Lock className="w-4 h-4" />}
-                label="Half-Life Secrets"
-              />
-              <NavButton 
-                active={activeTab === 'breath'} 
-                onClick={() => setActiveTab('breath')}
-                icon={<Wind className="w-4 h-4" />}
-                label="Sync-Breath"
-              />
-            </div>
-
-            <div className="pt-4 pb-2 border-t border-white/10">
-              <NavButton 
-                active={activeTab === 'settings'} 
-                onClick={() => setActiveTab('settings')}
-                icon={<Settings className="w-4 h-4" />}
-                label="User Settings"
-              />
-            </div>
-            
-            <div className="pt-8">
-              <FusionButton profile={profile} addSR={addSR} />
-            </div>
-          </nav>
-
+        <main className="max-w-md mx-auto h-[100dvh] flex flex-col relative">
           {/* Content Area */}
-          <section className="lg:col-span-9 bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden flex flex-col h-[75vh] relative shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+          <section className="flex-1 overflow-hidden relative pb-24">
             {skyContext?.current?.resonance?.active && (
               <div className="absolute top-0 left-0 right-0 z-50 bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 flex items-center gap-3">
                 <Zap className="w-3 h-3 text-rose-400 animate-pulse" />
@@ -875,18 +788,82 @@ export default function App() {
               </div>
             )}
             <AnimatePresence mode="wait">
-              {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
-              {activeTab === 'astront' && <AstrontView profile={profile} />}
               {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
+              {activeTab === 'astront' && <AstrontView profile={profile} />}
               {activeTab === 'space' && <SpaceView />}
-              {activeTab === 'art' && <ArtView profile={profile} />}
-              {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
               {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
-              {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}
-              {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
+              {activeTab === 'art' && <ArtView profile={profile} />}
               {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
             </AnimatePresence>
           </section>
+
+          {/* Bottom Navigation Bar */}
+          <div className="fixed bottom-24 right-6 z-50">
+            <FusionButton profile={profile} addSR={addSR} />
+          </div>
+          <nav className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 pb-safe z-50">
+            <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between relative">
+              <button
+                onClick={() => setActiveTab('time-warp')}
+                className={cn(
+                  "flex flex-col items-center gap-1 transition-colors",
+                  activeTab === 'time-warp' ? "text-rose-400" : "text-white/40 hover:text-white/60"
+                )}
+              >
+                <Clock className="w-6 h-6" />
+                <span className="text-[9px] font-mono uppercase tracking-widest">Warp</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('astront')}
+                className={cn(
+                  "flex flex-col items-center gap-1 transition-colors",
+                  activeTab === 'astront' ? "text-indigo-400" : "text-white/40 hover:text-white/60"
+                )}
+              >
+                <Sparkles className="w-6 h-6" />
+                <span className="text-[9px] font-mono uppercase tracking-widest">11-Bit</span>
+              </button>
+
+              {/* Center Home Button (Space) */}
+              <div className="relative -top-6">
+                <button
+                  onClick={() => setActiveTab('space')}
+                  className={cn(
+                    "w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-transform active:scale-95",
+                    activeTab === 'space' ? "bg-gradient-to-tr from-zinc-800 to-zinc-600 border-2 border-white/50" : "bg-black border border-white/20"
+                  )}
+                >
+                  <TreeDeciduous className={cn("w-8 h-8", activeTab === 'space' ? "text-white" : "text-white/60")} />
+                </button>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-mono uppercase tracking-widest text-white/60">
+                  Space
+                </div>
+              </div>
+
+              <button
+                onClick={() => setActiveTab('parallax')}
+                className={cn(
+                  "flex flex-col items-center gap-1 transition-colors",
+                  activeTab === 'parallax' ? "text-emerald-400" : "text-white/40 hover:text-white/60"
+                )}
+              >
+                <Navigation className="w-6 h-6" />
+                <span className="text-[9px] font-mono uppercase tracking-widest">Star</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('art')}
+                className={cn(
+                  "flex flex-col items-center gap-1 transition-colors",
+                  activeTab === 'art' ? "text-fuchsia-400" : "text-white/40 hover:text-white/60"
+                )}
+              >
+                <Palette className="w-6 h-6" />
+                <span className="text-[9px] font-mono uppercase tracking-widest">Art</span>
+              </button>
+            </div>
+          </nav>
         </main>
 
         <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] text-rose-200/40 font-mono flex items-center gap-4">
@@ -2155,14 +2132,48 @@ const CONSTELLATIONS = [
 function StellarParallaxView({ profile, otherPresence, moonData }: { profile: UserProfile | null, otherPresence: Presence | null, moonData: any }) {
   const [rotation, setRotation] = useState(0);
   const [selectedStar, setSelectedStar] = useState<typeof CONSTELLATIONS[0] | null>(null);
+  const [myLocation, setMyLocation] = useState<{lat: number, lng: number} | null>(null);
 
   useEffect(() => {
     const handleOrientation = (e: DeviceOrientationEvent) => {
       if (e.alpha) setRotation(e.alpha);
     };
     window.addEventListener('deviceorientation', handleOrientation);
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setMyLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      });
+    }
+    
     return () => window.removeEventListener('deviceorientation', handleOrientation);
   }, []);
+
+  const getPhysicalDistance = () => {
+    if (!myLocation || !otherPresence?.location) return "Scanning coordinates...";
+    
+    const lat1 = myLocation.lat;
+    const lon1 = myLocation.lng;
+    const lat2 = otherPresence.location.lat;
+    const lon2 = otherPresence.location.lng;
+    
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * (Math.PI/180);
+    const dLon = (lon2 - lon1) * (Math.PI/180); 
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const d = R * c; // Distance in km
+    
+    const lightSeconds = d / 299792;
+    // For very small distances, use micro light-seconds
+    if (lightSeconds < 0.001) {
+      return `${(lightSeconds * 1000000).toFixed(2)} µls (Micro Light-Seconds)`;
+    }
+    return `${lightSeconds.toFixed(6)} ls (Light-Seconds)`;
+  };
 
   return (
     <motion.div 
@@ -2284,6 +2295,9 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
                 </p>
                 <p className="text-[9px] text-rose-200/40 mt-1">
                   {getEmotionalDistance()}
+                </p>
+                <p className="text-[9px] text-emerald-400/60 mt-2 font-mono uppercase tracking-widest">
+                  Physical Void: {getPhysicalDistance()}
                 </p>
               </div>
             </motion.div>
@@ -2748,7 +2762,7 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="relative">
       <AnimatePresence>
         {showAnimation && (
           <motion.div 
@@ -2785,22 +2799,16 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
         onClick={triggerPulseAttempt}
         disabled={fusing}
         className={cn(
-          "w-full aspect-square rounded-full border-2 flex flex-col items-center justify-center gap-2 transition-all group relative overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.3)]",
+          "w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all group relative overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.3)]",
           fusing 
             ? "border-rose-500 bg-rose-500/20 animate-pulse shadow-[0_0_30px_rgba(244,63,94,0.3)]" 
-            : "border-white/10 hover:border-rose-500/50 hover:bg-rose-500/5 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] bg-black/40 backdrop-blur-sm"
+            : "border-rose-500/30 hover:border-rose-500/80 bg-black/60 backdrop-blur-md"
         )}
       >
-        <TreeDeciduous className={cn(
-          "w-12 h-12 transition-transform",
-          fusing ? "scale-125 text-rose-400" : "text-rose-900/50 group-hover:text-rose-500/50"
+        <Leaf className={cn(
+          "w-6 h-6 transition-transform",
+          fusing ? "scale-125 text-rose-400" : "text-rose-400 group-hover:text-rose-300"
         )} />
-        <span className={cn(
-          "text-[10px] font-mono uppercase tracking-[0.3em]",
-          fusing ? "text-rose-400" : "text-rose-200/40 group-hover:text-rose-500/50"
-        )}>
-          {fusing ? 'Syncing...' : 'Nuclear Fusion'}
-        </span>
         
         {fusing && (
           <motion.div 
@@ -2811,12 +2819,6 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
           />
         )}
       </button>
-      
-      <div className="text-center">
-        <p className="text-[9px] font-mono uppercase tracking-widest text-rose-200/40">
-          Sync status: <span className="text-rose-500/50">Optimal</span>
-        </p>
-      </div>
     </div>
   );
 }
