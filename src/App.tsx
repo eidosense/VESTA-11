@@ -55,7 +55,8 @@ import {
   X,
   BookOpen,
   Save,
-  Sparkles
+  Sparkles,
+  Palette
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -69,6 +70,7 @@ import { Moon, Sun, Compass, Star } from 'lucide-react';
 import AstrontView from './components/AstrontView';
 import TimeWarpView from './components/TimeWarpView';
 import SpaceView from './components/SpaceView';
+import ArtView from './components/ArtView';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -478,7 +480,7 @@ export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'art'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
@@ -801,6 +803,12 @@ export default function App() {
               label="Orbital Space"
             />
             <NavButton 
+              active={activeTab === 'art'} 
+              onClick={() => setActiveTab('art')}
+              icon={<Palette className="w-4 h-4" />}
+              label="Olive Grove Archive"
+            />
+            <NavButton 
               active={activeTab === 'mission-log'} 
               onClick={() => setActiveTab('mission-log')}
               icon={<BookOpen className="w-4 h-4" />}
@@ -871,6 +879,7 @@ export default function App() {
               {activeTab === 'astront' && <AstrontView profile={profile} />}
               {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
               {activeTab === 'space' && <SpaceView />}
+              {activeTab === 'art' && <ArtView profile={profile} />}
               {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
               {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
               {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}

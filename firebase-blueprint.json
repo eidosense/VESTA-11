@@ -150,9 +150,41 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["vesselId", "astronautId", "astronautRole", "content", "type", "timestamp"]
+    },
+    "Memory": {
+      "title": "Memory",
+      "description": "Shared mind palace notes and art",
+      "type": "object",
+      "properties": {
+        "author": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "type": { "type": "string", "enum": ["note", "art"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["author", "type", "createdAt"]
+    },
+    "TimelineEvent": {
+      "title": "TimelineEvent",
+      "description": "Key dates in Hayden and Arya's story",
+      "type": "object",
+      "properties": {
+        "event_date": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["event_date", "title", "description"]
     }
   },
   "firestore": {
+    "/memories/{memoryId}": {
+      "schema": "Memory",
+      "description": "Shared mind palace notes and art"
+    },
+    "/timeline/{eventId}": {
+      "schema": "TimelineEvent",
+      "description": "Key dates in Hayden and Arya's story"
+    },
     "/missionLogs/{logId}": {
       "schema": "MissionLog",
       "description": "Mission logs for astronauts"
