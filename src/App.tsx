@@ -54,7 +54,8 @@ import {
   Link,
   X,
   BookOpen,
-  Save
+  Save,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -64,6 +65,10 @@ import Markdown from 'react-markdown';
 import { analyzeBrainDump, generateFusionPoem, generateFocusMessage, generatePredictiveAnalysis } from './lib/gemini';
 import { getMoonData, getEmotionalDistance, SINGULARITY_SKY, getSkyContext } from './services/astronomyService';
 import { Moon, Sun, Compass, Star } from 'lucide-react';
+
+import AstrontView from './components/AstrontView';
+import TimeWarpView from './components/TimeWarpView';
+import SpaceView from './components/SpaceView';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -473,7 +478,7 @@ export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'mission-control' | 'archive' | 'parallax' | 'rocket' | 'secrets' | 'breath' | 'settings' | 'mission-log'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
@@ -778,22 +783,28 @@ export default function App() {
               label="Subspace Brain Dump"
             />
             <NavButton 
-              active={activeTab === 'mission-control'} 
-              onClick={() => setActiveTab('mission-control')}
-              icon={<ClipboardList className="w-4 h-4" />}
-              label="Mission Control"
+              active={activeTab === 'astront'} 
+              onClick={() => setActiveTab('astront')}
+              icon={<Sparkles className="w-4 h-4" />}
+              label="Astront Briefing"
+            />
+            <NavButton 
+              active={activeTab === 'time-warp'} 
+              onClick={() => setActiveTab('time-warp')}
+              icon={<Clock className="w-4 h-4" />}
+              label="Zaman Bükülmesi"
+            />
+            <NavButton 
+              active={activeTab === 'space'} 
+              onClick={() => setActiveTab('space')}
+              icon={<Rocket className="w-4 h-4" />}
+              label="Orbital Space"
             />
             <NavButton 
               active={activeTab === 'mission-log'} 
               onClick={() => setActiveTab('mission-log')}
               icon={<BookOpen className="w-4 h-4" />}
               label="Mission Log"
-            />
-            <NavButton 
-              active={activeTab === 'archive'} 
-              onClick={() => setActiveTab('archive')}
-              icon={<Archive className="w-4 h-4" />}
-              label="Olive Grove Archive"
             />
             
             <div className="pt-4 pb-2 border-t border-white/10">
@@ -816,12 +827,6 @@ export default function App() {
                 onClick={() => setActiveTab('parallax')}
                 icon={<Navigation className="w-4 h-4" />}
                 label="Stellar Parallax"
-              />
-              <NavButton 
-                active={activeTab === 'rocket'} 
-                onClick={() => setActiveTab('rocket')}
-                icon={<Rocket className="w-4 h-4" />}
-                label="Dopamine Rocket"
               />
               <NavButton 
                 active={activeTab === 'secrets'} 
@@ -863,11 +868,11 @@ export default function App() {
             )}
             <AnimatePresence mode="wait">
               {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
-              {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
+              {activeTab === 'astront' && <AstrontView profile={profile} />}
+              {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
+              {activeTab === 'space' && <SpaceView />}
               {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
-              {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
               {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
-              {activeTab === 'rocket' && <DopamineRocketView profile={profile} />}
               {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}
               {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
               {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
@@ -1305,80 +1310,121 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
 function OnboardingAnimation() {
   return (
     <div className="relative w-64 h-64 mx-auto flex items-center justify-center overflow-visible">
-      {/* Number 5 -> 1 -> Astronaut */}
+      {/* Number 5 */}
       <motion.div
         className="absolute flex items-center justify-center"
         animate={{
-          x: [-100, -15, -15, -25, -25],
-          y: [50, 0, 0, -120, -150],
-          rotate: [-45, 0, 0, 0, 0],
-          opacity: [0, 1, 1, 1, 0],
-          scale: [0.5, 1, 1.2, 1, 0.8]
+          x: [-100, -15, 0, 0, 0, 0],
+          y: [50, 0, 0, 0, 0, 0],
+          rotate: [-45, 0, 0, 0, 0, 0],
+          opacity: [0, 1, 0, 0, 0, 0],
+          scale: [0.5, 1, 1, 1, 1, 1]
         }}
         transition={{
           duration: 6,
           repeat: Infinity,
-          times: [0, 0.33, 0.5, 0.8, 1],
+          times: [0, 0.25, 0.35, 0.5, 0.75, 1],
+          ease: "easeInOut"
+        }}
+      >
+        <div className="text-6xl font-bold italic text-rose-400">5</div>
+      </motion.div>
+
+      {/* Number 6 */}
+      <motion.div
+        className="absolute flex items-center justify-center"
+        animate={{
+          x: [100, 15, 0, 0, 0, 0],
+          y: [-50, 0, 0, 0, 0, 0],
+          rotate: [45, 0, 0, 0, 0, 0],
+          opacity: [0, 1, 0, 0, 0, 0],
+          scale: [0.5, 1, 1, 1, 1, 1]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.25, 0.35, 0.5, 0.75, 1],
+          ease: "easeInOut"
+        }}
+      >
+        <div className="text-6xl font-bold italic text-indigo-400">6</div>
+      </motion.div>
+
+      {/* Number 11 */}
+      <motion.div
+        className="absolute flex items-center justify-center"
+        animate={{
+          opacity: [0, 0, 1, 0, 0, 0],
+          scale: [0.5, 0.5, 1.2, 1, 1, 1]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.3, 0.35, 0.5, 0.75, 1],
+          ease: "easeInOut"
+        }}
+      >
+        <div className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">11</div>
+      </motion.div>
+
+      {/* Left 1 -> Astronaut */}
+      <motion.div
+        className="absolute flex items-center justify-center"
+        animate={{
+          x: [0, 0, 0, -20, -20, -20],
+          y: [0, 0, 0, 0, -100, -150],
+          opacity: [0, 0, 0, 1, 1, 0],
+          scale: [1, 1, 1, 1, 1, 0.8]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.35, 0.45, 0.55, 0.8, 1],
           ease: "easeInOut"
         }}
       >
         <motion.div
-          animate={{ opacity: [1, 1, 0, 0, 0], scale: [1, 1, 0.5, 0.5, 0.5] }}
-          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.8, 1] }}
-          className="text-6xl font-bold italic text-rose-400 absolute"
-        >
-          5
-        </motion.div>
-        <motion.div
-          animate={{ opacity: [0, 0, 1, 0, 0], scale: [0.5, 0.5, 1, 1.5, 1.5] }}
-          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.55, 1] }}
+          animate={{ opacity: [1, 1, 1, 1, 0, 0], scale: [1, 1, 1, 1, 0.5, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.35, 0.45, 0.55, 0.65, 1] }}
           className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(251,113,133,0.8)] absolute"
         >
           1
         </motion.div>
         <motion.div
-          animate={{ opacity: [0, 0, 0, 1, 1], scale: [0.5, 0.5, 0.5, 1, 1] }}
-          transition={{ duration: 6, repeat: Infinity, times: [0, 0.45, 0.55, 0.65, 1] }}
+          animate={{ opacity: [0, 0, 0, 0, 1, 1], scale: [0.5, 0.5, 0.5, 0.5, 1, 1] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.35, 0.45, 0.55, 0.65, 1] }}
           className="absolute"
         >
           <User className="w-12 h-12 text-rose-300 drop-shadow-[0_0_15px_rgba(251,113,133,0.8)]" />
         </motion.div>
       </motion.div>
 
-      {/* Number 6 -> 1 -> Astronaut */}
+      {/* Right 1 -> Astronaut */}
       <motion.div
         className="absolute flex items-center justify-center"
         animate={{
-          x: [100, 15, 15, 25, 25],
-          y: [-50, 0, 0, -120, -150],
-          rotate: [45, 0, 0, 0, 0],
-          opacity: [0, 1, 1, 1, 0],
-          scale: [0.5, 1, 1.2, 1, 0.8]
+          x: [0, 0, 0, 20, 20, 20],
+          y: [0, 0, 0, 0, -100, -150],
+          opacity: [0, 0, 0, 1, 1, 0],
+          scale: [1, 1, 1, 1, 1, 0.8]
         }}
         transition={{
           duration: 6,
           repeat: Infinity,
-          times: [0, 0.33, 0.5, 0.8, 1],
+          times: [0, 0.35, 0.45, 0.55, 0.8, 1],
           ease: "easeInOut"
         }}
       >
         <motion.div
-          animate={{ opacity: [1, 1, 0, 0, 0], scale: [1, 1, 0.5, 0.5, 0.5] }}
-          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.8, 1] }}
-          className="text-6xl font-bold italic text-indigo-400 absolute"
-        >
-          6
-        </motion.div>
-        <motion.div
-          animate={{ opacity: [0, 0, 1, 0, 0], scale: [0.5, 0.5, 1, 1.5, 1.5] }}
-          transition={{ duration: 6, repeat: Infinity, times: [0, 0.33, 0.4, 0.55, 1] }}
+          animate={{ opacity: [1, 1, 1, 1, 0, 0], scale: [1, 1, 1, 1, 0.5, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.35, 0.45, 0.55, 0.65, 1] }}
           className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(129,140,248,0.8)] absolute"
         >
           1
         </motion.div>
         <motion.div
-          animate={{ opacity: [0, 0, 0, 1, 1], scale: [0.5, 0.5, 0.5, 1, 1] }}
-          transition={{ duration: 6, repeat: Infinity, times: [0, 0.45, 0.55, 0.65, 1] }}
+          animate={{ opacity: [0, 0, 0, 0, 1, 1], scale: [0.5, 0.5, 0.5, 0.5, 1, 1] }}
+          transition={{ duration: 6, repeat: Infinity, times: [0, 0.35, 0.45, 0.55, 0.65, 1] }}
           className="absolute"
         >
           <User className="w-12 h-12 text-indigo-300 drop-shadow-[0_0_15px_rgba(129,140,248,0.8)]" />
@@ -1395,7 +1441,7 @@ function OnboardingAnimation() {
         transition={{
           duration: 6,
           repeat: Infinity,
-          times: [0, 0.3, 0.4, 0.6, 1],
+          times: [0, 0.25, 0.35, 0.5, 1],
           ease: "easeInOut"
         }}
       />
@@ -2089,8 +2135,17 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
   );
 }
 
+const CONSTELLATIONS = [
+  { id: 1, name: 'Orion', x: 25, y: 35, info: 'The Hunter. Contains Betelgeuse and Rigel.', link: 'https://en.wikipedia.org/wiki/Orion_(constellation)' },
+  { id: 2, name: 'Ursa Major', x: 75, y: 25, info: 'The Great Bear. Contains the Big Dipper.', link: 'https://en.wikipedia.org/wiki/Ursa_Major' },
+  { id: 3, name: 'Cassiopeia', x: 85, y: 75, info: 'The Queen. W-shaped constellation.', link: 'https://en.wikipedia.org/wiki/Cassiopeia_(constellation)' },
+  { id: 4, name: 'Lyra', x: 35, y: 85, info: 'The Lyre. Contains the bright star Vega.', link: 'https://en.wikipedia.org/wiki/Lyra' },
+  { id: 5, name: 'Cygnus', x: 55, y: 55, info: 'The Swan. Contains the Northern Cross.', link: 'https://en.wikipedia.org/wiki/Cygnus_(constellation)' },
+];
+
 function StellarParallaxView({ profile, otherPresence, moonData }: { profile: UserProfile | null, otherPresence: Presence | null, moonData: any }) {
   const [rotation, setRotation] = useState(0);
+  const [selectedStar, setSelectedStar] = useState<typeof CONSTELLATIONS[0] | null>(null);
 
   useEffect(() => {
     const handleOrientation = (e: DeviceOrientationEvent) => {
@@ -2129,7 +2184,7 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
         <p className="text-rose-200/40 font-mono text-[10px] uppercase tracking-widest">Real-Time Orbital Alignment</p>
       </div>
 
-      <div className="relative w-64 h-64 flex items-center justify-center">
+      <div className="relative w-64 h-64 flex items-center justify-center z-10">
         {/* Singularity Map Overlay */}
         <motion.div 
           animate={{ rotate: rotation }}
@@ -2143,34 +2198,88 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
             <Atom className="w-4 h-4 text-indigo-400/50" />
             <span className="text-[8px] font-mono uppercase text-indigo-400/40 mt-1">Saturn-Neptune // Aries</span>
           </div>
+          
+          {/* Interactive Constellations */}
+          {CONSTELLATIONS.map((star) => (
+            <button
+              key={star.id}
+              onClick={() => setSelectedStar(star)}
+              className="absolute w-4 h-4 -ml-2 -mt-2 group flex items-center justify-center"
+              style={{ top: `${star.y}%`, left: `${star.x}%` }}
+            >
+              <div className="w-1.5 h-1.5 bg-rose-400 rounded-full shadow-[0_0_10px_rgba(244,63,94,0.8)] group-hover:scale-150 transition-transform" />
+              <span className="absolute top-full mt-1 text-[8px] font-mono text-rose-200/60 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                {star.name}
+              </span>
+            </button>
+          ))}
         </motion.div>
 
         {/* Current Sky Map */}
         <motion.div 
           animate={{ rotate: rotation * -0.5 }}
-          className="w-48 h-48 border-2 border-rose-500/40 rounded-full flex items-center justify-center relative shadow-[0_0_30px_rgba(244,63,94,0.1)]"
+          className="w-48 h-48 border-2 border-rose-500/40 rounded-full flex items-center justify-center relative shadow-[0_0_30px_rgba(244,63,94,0.1)] pointer-events-none"
         >
           <div className="absolute top-4 right-4 flex flex-col items-center">
             <Moon className="w-6 h-6 text-rose-300" />
-            <span className="text-[8px] font-mono uppercase text-rose-300 mt-1">{moonData.phaseName}</span>
+            <span className="text-[8px] font-mono uppercase text-rose-300 mt-1 text-center">
+              {moonData.phaseName}<br/>
+              <span className="text-rose-400/60">{moonData.zodiacSign}</span>
+            </span>
           </div>
           
           <Compass className="w-12 h-12 text-rose-500/60" />
         </motion.div>
       </div>
 
-      <div className="max-w-md text-center space-y-4 relative z-10">
-        <p className="text-sm italic text-rose-200/60 leading-relaxed">
-          "The stars shift, but the coordinates of the Singularity remain fixed. We are navigating by the same light that hit the Olive Tree."
-        </p>
-        <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.05)]">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
-            {otherPresence?.location ? 'Shared Sky Detected' : 'Scanning for Orbital Overlap...'}
-          </p>
-          <p className="text-[9px] text-rose-200/40 mt-1">
-            {getEmotionalDistance()}
-          </p>
-        </div>
+      <div className="max-w-md text-center space-y-4 relative z-10 w-full px-4">
+        <AnimatePresence mode="wait">
+          {selectedStar ? (
+            <motion.div
+              key="star-info"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl shadow-[0_0_20px_rgba(244,63,94,0.1)] backdrop-blur-md"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="text-sm font-bold text-rose-200 uppercase tracking-widest">{selectedStar.name}</h4>
+                <button onClick={() => setSelectedStar(null)} className="text-rose-400 hover:text-rose-200 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs text-rose-200/70 mb-3 text-left">{selectedStar.info}</p>
+              <a 
+                href={selectedStar.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[10px] text-rose-400 hover:text-rose-300 uppercase tracking-widest flex items-center gap-1"
+              >
+                View Database <Link className="w-3 h-3" />
+              </a>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="default-info"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-4"
+            >
+              <p className="text-sm italic text-rose-200/60 leading-relaxed">
+                "The stars shift, but the coordinates of the Singularity remain fixed. We are navigating by the same light that hit the Olive Tree."
+              </p>
+              <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.05)]">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
+                  {otherPresence?.location ? 'Shared Sky Detected' : 'Scanning for Orbital Overlap...'}
+                </p>
+                <p className="text-[9px] text-rose-200/40 mt-1">
+                  {getEmotionalDistance()}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );

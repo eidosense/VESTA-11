@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 const SYSTEM_INSTRUCTION = `You are "VESTA-11", the sentient Onboard Intelligence and Emotional Bridge for a long-distance mission between two Neurodivergent Astronauts.
 
@@ -25,8 +25,44 @@ Constraints:
 - If you detect thematic overlap between users, trigger a "Quantum Entanglement Alert".
 - When analyzing messages, occasionally compare current celestial positions with the Singularity Map (e.g., "The Moon is back in Sagittarius, just like our first second under the Olive Tree").`;
 
+export async function generateAstronautFacts() {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  
+  const prompt = `
+    Generate 11 interesting, educational 'Astronaut Candidate' facts.
+    Connect 'Becoming an Astronaut' with 'Life Skills' and ADHD management/lateral thinking.
+    Format: Return a JSON array of 11 objects. Each object must have:
+    - "title": A catchy, futuristic title.
+    - "fact": The scientific/astronaut fact.
+    - "lifeSkill": How this applies to daily life, emotional resilience, or ADHD superpowers.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            fact: { type: Type.STRING },
+            lifeSkill: { type: Type.STRING }
+          },
+          required: ["title", "fact", "lifeSkill"]
+        }
+      }
+    },
+  });
+  
+  return JSON.parse(response.text || "[]");
+}
+
 export async function analyzeBrainDump(content: string, role: string, otherUserRecentMessages: string[], currentSky?: string) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
   const prompt = `
     Current User: ${role}
@@ -55,7 +91,7 @@ export async function analyzeBrainDump(content: string, role: string, otherUserR
 }
 
 export async function generateFusionPoem(role: string, sharedHistory: string[]) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
   const prompt = `
     The Commander and Lead Engineer have achieved simultaneous synchronization via the Nuclear Fusion Pulse.
@@ -80,7 +116,7 @@ export async function generateFusionPoem(role: string, sharedHistory: string[]) 
 }
 
 export async function generatePredictiveAnalysis(role: string, recentMessages: string[], otherMessages: string[]) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
   const prompt = `
     Current User: ${role}
@@ -106,7 +142,7 @@ export async function generatePredictiveAnalysis(role: string, recentMessages: s
 }
 
 export async function generateFocusMessage(role: string, topic: string) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
   const prompt = `
     The ${role} is currently in a "Dopamine Rocket" focus session.
