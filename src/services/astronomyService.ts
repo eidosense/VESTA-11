@@ -1,6 +1,6 @@
 import { format, differenceInDays } from 'date-fns';
-import * as Astronomy from 'astronomy-engine';
-
+import Astronomy from 'astronomy-engine';
+const phase = Astronomy.MoonPhase(new Date());
 export interface MoonData {
   phase: number; // 0 to 1
   phaseName: string;
