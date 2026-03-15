@@ -26,7 +26,7 @@ Constraints:
 - When analyzing messages, occasionally compare current celestial positions with the Singularity Map (e.g., "The Moon is back in Sagittarius, just like our first second under the Olive Tree").`;
 
 export async function analyzeBrainDump(content: string, role: string, otherUserRecentMessages: string[], currentSky?: string) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   const prompt = `
     Current User: ${role}
@@ -55,7 +55,7 @@ export async function analyzeBrainDump(content: string, role: string, otherUserR
 }
 
 export async function generateFusionPoem(role: string, sharedHistory: string[]) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   const prompt = `
     The Commander and Lead Engineer have achieved simultaneous synchronization via the Nuclear Fusion Pulse.
@@ -80,7 +80,7 @@ export async function generateFusionPoem(role: string, sharedHistory: string[]) 
 }
 
 export async function generatePredictiveAnalysis(role: string, recentMessages: string[], otherMessages: string[]) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   const prompt = `
     Current User: ${role}
@@ -106,7 +106,7 @@ export async function generatePredictiveAnalysis(role: string, recentMessages: s
 }
 
 export async function generateFocusMessage(role: string, topic: string) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   const prompt = `
     The ${role} is currently in a "Dopamine Rocket" focus session.
