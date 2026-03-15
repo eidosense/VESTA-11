@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import { MoonPhase, Body, Observer } from 'astronomy-engine';
+import { MoonPhase } from 'astronomy-engine';
 
 const SINGULARITY_DATE = new Date('2026-03-11T20:00:00Z');
 

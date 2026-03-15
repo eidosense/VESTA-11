@@ -154,5 +154,10 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId);
     }
+
+    // Connection Test
+    match /_connection_test_/{docId} {
+      allow read: if true;
+    }
   }
 }

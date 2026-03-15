@@ -73,6 +73,8 @@ import TimeWarpView from './components/TimeWarpView';
 import SpaceView from './components/SpaceView';
 import ArtView from './components/ArtView';
 
+import { audioService } from './services/audioService';
+
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -481,6 +483,7 @@ export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'art'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
@@ -755,6 +758,10 @@ export default function App() {
     );
   }
 
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
   if (!user) {
     return <LoginScreen moonData={moonData} inviteError={inviteError} />;
   }
@@ -772,6 +779,7 @@ export default function App() {
         }}
       />
       <div className="fixed inset-0 bg-gradient-to-b from-indigo-950/60 via-purple-900/30 to-black/90 z-0" />
+      <CosmicDust />
 
       <div className="relative z-10">
         <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
@@ -804,7 +812,10 @@ export default function App() {
           <nav className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 pb-safe z-50">
             <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between relative">
               <button
-                onClick={() => setActiveTab('time-warp')}
+                onClick={() => {
+                  audioService.playClick();
+                  setActiveTab('time-warp');
+                }}
                 className={cn(
                   "flex flex-col items-center gap-1 transition-colors",
                   activeTab === 'time-warp' ? "text-rose-400" : "text-white/40 hover:text-white/60"
@@ -815,7 +826,10 @@ export default function App() {
               </button>
               
               <button
-                onClick={() => setActiveTab('astront')}
+                onClick={() => {
+                  audioService.playClick();
+                  setActiveTab('astront');
+                }}
                 className={cn(
                   "flex flex-col items-center gap-1 transition-colors",
                   activeTab === 'astront' ? "text-indigo-400" : "text-white/40 hover:text-white/60"
@@ -828,7 +842,10 @@ export default function App() {
               {/* Center Home Button (Space) */}
               <div className="relative -top-6">
                 <button
-                  onClick={() => setActiveTab('space')}
+                  onClick={() => {
+                    audioService.playClick();
+                    setActiveTab('space');
+                  }}
                   className={cn(
                     "w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-transform active:scale-95",
                     activeTab === 'space' ? "bg-gradient-to-tr from-zinc-800 to-zinc-600 border-2 border-white/50" : "bg-black border border-white/20"
@@ -842,7 +859,10 @@ export default function App() {
               </div>
 
               <button
-                onClick={() => setActiveTab('parallax')}
+                onClick={() => {
+                  audioService.playClick();
+                  setActiveTab('parallax');
+                }}
                 className={cn(
                   "flex flex-col items-center gap-1 transition-colors",
                   activeTab === 'parallax' ? "text-emerald-400" : "text-white/40 hover:text-white/60"
@@ -1622,6 +1642,95 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
         <span>CORE TEMP: 15.7M K</span>
         <span>STATUS: HEARTS SYNCED</span>
       </div>
+    </div>
+  );
+}
+
+function SplashScreen({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 4000);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
+      <div className="relative flex items-center justify-center">
+        {/* 5 Energy */}
+        <motion.div
+          initial={{ x: -100, opacity: 0, scale: 0.5 }}
+          animate={{ x: -20, opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="text-8xl font-bold italic text-indigo-500 drop-shadow-[0_0_20px_rgba(99,102,241,0.5)]"
+        >
+          5
+        </motion.div>
+        
+        {/* 6 Energy */}
+        <motion.div
+          initial={{ x: 100, opacity: 0, scale: 0.5 }}
+          animate={{ x: 20, opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="text-8xl font-bold italic text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.5)]"
+        >
+          6
+        </motion.div>
+
+        {/* Fusion Effect */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: [0, 2, 1], opacity: [0, 1, 0] }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="absolute inset-0 bg-white rounded-full blur-3xl"
+        />
+
+        {/* Resulting 11 */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1.2 }}
+          transition={{ delay: 2, duration: 0.5, type: "spring" }}
+          className="absolute text-9xl font-bold italic text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.8)]"
+        >
+          11
+        </motion.div>
+      </div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.5 }}
+        className="absolute bottom-20 text-white/40 font-mono text-xs uppercase tracking-[0.3em]"
+      >
+        The Singularity Alignment
+      </motion.div>
+    </div>
+  );
+}
+
+function CosmicDust() {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {[...Array(50)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ 
+            x: Math.random() * window.innerWidth, 
+            y: Math.random() * window.innerHeight,
+            opacity: Math.random() * 0.5,
+            scale: Math.random() * 0.5 + 0.5
+          }}
+          animate={{ 
+            y: [null, Math.random() * window.innerHeight],
+            x: [null, Math.random() * window.innerWidth],
+            opacity: [0.1, 0.5, 0.1]
+          }}
+          transition={{ 
+            duration: Math.random() * 20 + 10, 
+            repeat: Infinity, 
+            ease: "linear" 
+          }}
+          className="absolute w-1 h-1 bg-white rounded-full blur-[1px]"
+        />
+      ))}
     </div>
   );
 }
@@ -2796,7 +2905,10 @@ function FusionButton({ profile, addSR }: { profile: UserProfile | null, addSR: 
       </AnimatePresence>
 
       <button 
-        onClick={triggerPulseAttempt}
+        onClick={() => {
+          audioService.playClick();
+          triggerPulseAttempt();
+        }}
         disabled={fusing}
         className={cn(
           "w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all group relative overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.3)]",
