@@ -797,16 +797,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-rose-50/90 font-sans selection:bg-rose-500/30 relative overflow-hidden">
-      {/* Deep Space Background with Radial Gradient */}
+      {/* Deep Space Background with Enhanced Radial Gradient */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-950/40 via-black to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-950/50 via-[#020205] to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,_rgba(120,0,255,0.15),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,_rgba(255,0,120,0.1),_transparent_50%)]" />
         <div 
-          className="absolute inset-0 pointer-events-none opacity-40 animate-slow-pan"
+          className="absolute inset-0 pointer-events-none opacity-30 animate-slow-pan"
           style={{ 
             backgroundImage: `url('${bgImage || 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop'}')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            filter: 'brightness(0.5) contrast(1.2)'
+            filter: 'brightness(0.4) contrast(1.3) saturate(0.8)'
           }}
         />
       </div>
@@ -880,8 +882,9 @@ export default function App() {
             </button>
 
             {/* Nuclear Fusion Pulse (Center) */}
-            <div className="relative -top-6">
-              <div className="absolute inset-0 bg-rose-500/20 blur-2xl rounded-full animate-pulse" />
+            <div className="relative -top-8">
+              <div className="absolute inset-0 bg-rose-500/30 blur-3xl rounded-full animate-pulse" />
+              <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full animate-pulse delay-700" />
               <button
                 onClick={() => {
                   audioService.playFusion();
@@ -889,14 +892,15 @@ export default function App() {
                 }}
                 className={cn(
                   "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 relative z-10",
-                  "bg-gradient-to-br from-rose-500 to-indigo-600 shadow-[0_0_30px_rgba(244,63,94,0.4)]",
-                  "hover:shadow-[0_0_50px_rgba(244,63,94,0.6)] hover:scale-110 active:scale-95",
-                  activeTab === 'parallax' ? "border-2 border-white" : "border border-white/20"
+                  "bg-gradient-to-br from-rose-500 via-purple-600 to-indigo-600 shadow-[0_0_40px_rgba(244,63,94,0.5)]",
+                  "hover:shadow-[0_0_60px_rgba(244,63,94,0.7)] hover:scale-110 active:scale-95",
+                  "border-2",
+                  activeTab === 'parallax' ? "border-white" : "border-white/30"
                 )}
               >
-                <Zap className="w-8 h-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+                <Zap className="w-8 h-8 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]" />
               </button>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-mono uppercase tracking-[0.2em] text-rose-400 font-bold whitespace-nowrap">
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-mono uppercase tracking-[0.2em] text-rose-400 font-bold whitespace-nowrap drop-shadow-sm">
                 Star
               </div>
             </div>
@@ -928,7 +932,7 @@ export default function App() {
               )}
             >
               <Clock className="w-5 h-5" />
-              <span className="text-[8px] font-mono uppercase tracking-widest">Warp</span>
+              <span className="text-[8px] font-mono uppercase tracking-widest">Time Warp</span>
             </button>
           </div>
         </nav>
