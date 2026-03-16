@@ -10,6 +10,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const ensureAbsoluteUrl = (url: string) => {
+  if (!url) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.includes('.') && !url.includes(' ')) return `https://${url}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+};
+
 import { 
   collection, 
   doc, 
@@ -175,7 +182,7 @@ export default function AstrontView({ profile }: { profile: any }) {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <a 
-                    href={facts[featuredIndex].source} 
+                    href={ensureAbsoluteUrl(facts[featuredIndex].source)} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
@@ -287,7 +294,7 @@ export default function AstrontView({ profile }: { profile: any }) {
                       {fact.fact}
                     </p>
                     <a 
-                      href={fact.source} 
+                      href={ensureAbsoluteUrl(fact.source)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[10px] text-indigo-400 hover:underline"
