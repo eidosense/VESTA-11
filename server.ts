@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import { MoonPhase } from 'astronomy-engine';
+import * as Astronomy from 'astronomy-engine';
 
 const SINGULARITY_DATE = new Date('2026-03-11T20:00:00Z');
 
@@ -12,7 +12,13 @@ async function startServer() {
   // API routes
   app.get("/api/celestial-sync", (req, res) => {
     const now = new Date();
+    const AstronomyLib = (Astronomy as any).default || Astronomy;
+    const MoonPhase = AstronomyLib.MoonPhase;
     
+    if (typeof MoonPhase !== 'function') {
+      return res.status(500).json({ error: 'MoonPhase is not a function' });
+    }
+
     // Calculate current moon data
     const moonPhase = MoonPhase(now) / 360;
     const illumination = (1 - Math.cos(moonPhase * 2 * Math.PI)) / 2;

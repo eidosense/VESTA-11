@@ -162,6 +162,18 @@ service cloud.firestore {
       allow write: if isOwner(userId);
     }
 
+    // Daily Briefings
+    match /daily_briefings/{briefingId} {
+      allow read: if isMember(resource.data.vesselId);
+      allow create: if isMember(request.resource.data.vesselId);
+    }
+
+    // Shared Discoveries
+    match /shared_discoveries/{discoveryId} {
+      allow read: if isMember(resource.data.vesselId);
+      allow create: if isMember(request.resource.data.vesselId) && request.resource.data.senderId == request.auth.uid;
+    }
+
     // Connection Test
     match /_connection_test_/{docId} {
       allow read: if true;

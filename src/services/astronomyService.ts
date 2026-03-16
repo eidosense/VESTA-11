@@ -1,5 +1,5 @@
 import { format, differenceInDays } from 'date-fns';
-import { MoonPhase } from 'astronomy-engine';
+import * as Astronomy from 'astronomy-engine';
 
 export interface MoonData {
   phase: number; // 0 to 1
@@ -19,6 +19,14 @@ export const SINGULARITY_SKY = {
 };
 
 export function getMoonData(date: Date = new Date()): MoonData {
+  const AstronomyLib = (Astronomy as any).default || Astronomy;
+  const MoonPhase = AstronomyLib.MoonPhase;
+  
+  if (typeof MoonPhase !== 'function') {
+    console.error('MoonPhase is not a function. AstronomyLib:', AstronomyLib);
+    return { phase: 0, phaseName: 'Unknown', illumination: 0, zodiacSign: 'Unknown' };
+  }
+
   const phase = MoonPhase(date) / 360; // Convert degrees to 0-1
   
   let phaseName = '';

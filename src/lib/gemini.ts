@@ -29,12 +29,21 @@ export async function generateAstronautFacts() {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
   const prompt = `
-    Generate 11 interesting, educational 'Astronaut Candidate' facts.
-    Connect 'Becoming an Astronaut' with 'Life Skills' and ADHD management/lateral thinking.
+    Generate 11 highly niche, scientific, and "smart" facts related to space exploration, astrophysics, or astronaut training.
+    These should be "dinner party" facts—surprising, deep, and intellectually stimulating.
+    Connect each fact with a "Life Skill" or "ADHD Protocol" that embraces neurodivergent thinking (hyper-focus, lateral thinking, pattern recognition).
+    
+    Examples of niche topics:
+    - The "Overview Effect" and its neurological impact.
+    - Time dilation on the ISS vs Earth.
+    - How astronauts use "Mental Rehearsal" to handle high-stress failures.
+    - The chemistry of "Space Smell" (seared steak and hot metal).
+    - Why the human brain's "Circadian Rhythm" shifts in orbit.
+    
     Format: Return a JSON array of 11 objects. Each object must have:
-    - "title": A catchy, futuristic title.
-    - "fact": The scientific/astronaut fact.
-    - "lifeSkill": How this applies to daily life, emotional resilience, or ADHD superpowers.
+    - "title": A sophisticated, catchy title.
+    - "fact": The niche scientific/astronaut fact (detailed and smart).
+    - "lifeSkill": A practical application for emotional resilience or ADHD superpowers.
   `;
 
   const response = await ai.models.generateContent({
