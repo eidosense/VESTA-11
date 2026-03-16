@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Loader2, Sparkles, BookOpen, Brain, Send, Radio, Zap } from 'lucide-react';
+import { Loader2, Sparkles, BookOpen, Brain, Send, Radio, Zap, Rocket, Link } from 'lucide-react';
 import { generateAstronautFacts } from '../lib/gemini';
 import { db } from '../firebase';
 import { clsx, type ClassValue } from 'clsx';
@@ -28,6 +28,8 @@ interface Fact {
   title: string;
   fact: string;
   lifeSkill: string;
+  motivation: string;
+  source: string;
 }
 
 interface SharedDiscovery {
@@ -77,7 +79,11 @@ export default function AstrontView({ profile }: { profile: any }) {
           setFacts(newFacts);
         }
       } catch (err) {
-        console.error("Failed to fetch Astront facts:", err);
+        console.error("Detailed error in fetchDailyFacts:", err);
+        if (err instanceof Error) {
+          console.error("Error message:", err.message);
+          console.error("Error stack:", err.stack);
+        }
         setError("Failed to establish uplink with VESTA-11 for daily briefing.");
       } finally {
         setLoading(false);
@@ -129,7 +135,7 @@ export default function AstrontView({ profile }: { profile: any }) {
             Astront Briefing
           </h3>
           <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">
-            11 Daily Protocols for Astronaut Candidates
+            30 Daily Protocols for Astronaut Candidates
           </p>
         </div>
       </div>
@@ -157,17 +163,34 @@ export default function AstrontView({ profile }: { profile: any }) {
                 "{facts[featuredIndex].fact}"
               </p>
               <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-4 h-4 text-fuchsia-400" />
-                  <span className="text-xs text-fuchsia-300/80 font-medium">{facts[featuredIndex].lifeSkill}</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-fuchsia-400" />
+                    <span className="text-xs text-fuchsia-300/80 font-medium">{facts[featuredIndex].lifeSkill}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Rocket className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs text-emerald-300/80 font-medium">{facts[featuredIndex].motivation}</span>
+                  </div>
                 </div>
-                <button 
-                  onClick={() => broadcastFact(facts[featuredIndex])}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/30 rounded-lg text-[10px] font-mono uppercase tracking-widest text-rose-100 transition-all"
-                >
-                  <Send className="w-3 h-3" />
-                  Broadcast
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                  <a 
+                    href={facts[featuredIndex].source} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
+                  >
+                    <Link className="w-3 h-3" />
+                    Source
+                  </a>
+                  <button 
+                    onClick={() => broadcastFact(facts[featuredIndex])}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/30 rounded-lg text-[10px] font-mono uppercase tracking-widest text-rose-100 transition-all"
+                  >
+                    <Send className="w-3 h-3" />
+                    Broadcast
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -262,6 +285,25 @@ export default function AstrontView({ profile }: { profile: any }) {
                     </div>
                     <p className="text-sm text-rose-100/80 leading-relaxed">
                       {fact.fact}
+                    </p>
+                    <a 
+                      href={fact.source} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-indigo-400 hover:underline"
+                    >
+                      <Link className="w-3 h-3" />
+                      View Source
+                    </a>
+                  </div>
+
+                  <div className="space-y-2 pt-4 border-t border-white/5">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-emerald-400">
+                      <Rocket className="w-3 h-3" />
+                      <span>Mission Motivation</span>
+                    </div>
+                    <p className="text-sm text-emerald-100/80 leading-relaxed italic">
+                      {fact.motivation}
                     </p>
                   </div>
 

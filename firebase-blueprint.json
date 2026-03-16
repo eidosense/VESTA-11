@@ -24,6 +24,50 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["content", "authorId"]
+    },
+    "daily_briefing": {
+      "title": "Daily Briefing",
+      "description": "Daily scientific protocols for astronauts",
+      "type": "object",
+      "properties": {
+        "vesselId": { "type": "string" },
+        "date": { "type": "string" },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "fact": { "type": "string" },
+              "lifeSkill": { "type": "string" },
+              "motivation": { "type": "string" },
+              "source": { "type": "string" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "shared_discovery": {
+      "title": "Shared Discovery",
+      "description": "A fact shared with the vessel",
+      "type": "object",
+      "properties": {
+        "vesselId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderRole": { "type": "string" },
+        "fact": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "fact": { "type": "string" },
+            "lifeSkill": { "type": "string" },
+            "motivation": { "type": "string" },
+            "source": { "type": "string" }
+          }
+        },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -34,6 +78,14 @@
     "/memories/{memoryId}": {
       "schema": "memories",
       "description": "Shared memories"
+    },
+    "/daily_briefings/{briefingId}": {
+      "schema": "daily_briefing",
+      "description": "Daily mission protocols"
+    },
+    "/shared_discoveries/{discoveryId}": {
+      "schema": "shared_discovery",
+      "description": "Vessel-wide broadcasts"
     }
   }
 }

@@ -164,13 +164,13 @@ service cloud.firestore {
 
     // Daily Briefings
     match /daily_briefings/{briefingId} {
-      allow read: if isMember(resource.data.vesselId);
+      allow read: if isAuthenticated() && (resource == null || isMember(resource.data.vesselId));
       allow create: if isMember(request.resource.data.vesselId);
     }
 
     // Shared Discoveries
     match /shared_discoveries/{discoveryId} {
-      allow read: if isMember(resource.data.vesselId);
+      allow read: if isAuthenticated() && (resource == null || isMember(resource.data.vesselId));
       allow create: if isMember(request.resource.data.vesselId) && request.resource.data.senderId == request.auth.uid;
     }
 

@@ -29,21 +29,22 @@ export async function generateAstronautFacts() {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   
   const prompt = `
-    Generate 11 highly niche, scientific, and "smart" facts related to space exploration, astrophysics, or astronaut training.
-    These should be "dinner party" facts—surprising, deep, and intellectually stimulating.
-    Connect each fact with a "Life Skill" or "ADHD Protocol" that embraces neurodivergent thinking (hyper-focus, lateral thinking, pattern recognition).
+    Research and generate 30 highly niche, current, and scientific facts related to space exploration, astrophysics, or astronaut training.
+    Use Google Search to find the most recent developments (e.g., Artemis mission updates, new exoplanet discoveries, recent ISS experiments).
     
-    Examples of niche topics:
-    - The "Overview Effect" and its neurological impact.
-    - Time dilation on the ISS vs Earth.
-    - How astronauts use "Mental Rehearsal" to handle high-stress failures.
-    - The chemistry of "Space Smell" (seared steak and hot metal).
-    - Why the human brain's "Circadian Rhythm" shifts in orbit.
-    
-    Format: Return a JSON array of 11 objects. Each object must have:
-    - "title": A sophisticated, catchy title.
-    - "fact": The niche scientific/astronaut fact (detailed and smart).
-    - "lifeSkill": A practical application for emotional resilience or ADHD superpowers.
+    Each entry must include:
+    1. A sophisticated title.
+    2. The scientific fact or recent discovery.
+    3. A "Life Skill" or "ADHD Protocol" connecting it to neurodivergent strengths.
+    4. A "Motivational Tip" for aspiring astronauts.
+    5. A "Source" (URL or specific mission/paper reference).
+
+    Format: Return a JSON array of 30 objects. Each object must have:
+    - "title": string
+    - "fact": string
+    - "lifeSkill": string
+    - "motivation": string
+    - "source": string
   `;
 
   const response = await ai.models.generateContent({
@@ -52,6 +53,7 @@ export async function generateAstronautFacts() {
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
+      tools: [{ googleSearch: {} }],
       responseSchema: {
         type: Type.ARRAY,
         items: {
@@ -59,15 +61,26 @@ export async function generateAstronautFacts() {
           properties: {
             title: { type: Type.STRING },
             fact: { type: Type.STRING },
-            lifeSkill: { type: Type.STRING }
+            lifeSkill: { type: Type.STRING },
+            motivation: { type: Type.STRING },
+            source: { type: Type.STRING }
           },
-          required: ["title", "fact", "lifeSkill"]
+          required: ["title", "fact", "lifeSkill", "motivation", "source"]
         }
       }
     },
   });
   
-  return JSON.parse(response.text || "[]");
+  try {
+    const text = response.text;
+    if (!text) return [];
+    
+    const cleanJson = text.replace(/```json\n?|```/g, '').trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error("Failed to parse Gemini response as JSON:", error, response.text);
+    return [];
+  }
 }
 
 export async function analyzeBrainDump(content: string, role: string, otherUserRecentMessages: string[], currentSky?: string) {
