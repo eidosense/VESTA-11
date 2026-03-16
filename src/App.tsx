@@ -1107,9 +1107,12 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
   const [topic, setTopic] = useState('');
   const [radioMessages, setRadioMessages] = useState<string[]>([]);
   const [audioActive, setAudioActive] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!profile?.vesselId) return;
+    console.log("Subscribing to focus_sessions for vessel:", profile.vesselId);
     const q = query(
       collection(db, 'focus_sessions'), 
       where('vesselId', '==', profile.vesselId),
@@ -1117,40 +1120,103 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
-        setSession({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as FocusSession);
+        const data = snapshot.docs[0].data() as FocusSession;
+        setSession({ id: snapshot.docs[0].id, ...data });
       } else {
         setSession(null);
+        setRadioMessages([]); 
       }
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'focus_sessions'));
-    return () => unsubscribe();
-  }, [profile]);
+    }, (error) => {
+      console.error("Focus session snapshot error:", error);
+      handleFirestoreError(error, OperationType.LIST, 'focus_sessions');
+    });
+    return () => {
+      unsubscribe();
+      audioService.stopAmbient();
+    };
+  }, [profile?.vesselId]);
 
   useEffect(() => {
     if (session?.active) {
+      const triggerFirstMessage = async () => {
+        if (profile) {
+          try {
+            const msg = await generateFocusMessage(profile.role, session.topic);
+            setRadioMessages(prev => [msg, ...prev].slice(0, 10));
+          } catch (err) {
+            console.error("Failed to generate initial focus message:", err);
+          }
+        }
+      };
+      triggerFirstMessage();
+
       const interval = setInterval(async () => {
         if (profile) {
-          const msg = await generateFocusMessage(profile.role, session.topic);
-          setRadioMessages(prev => [msg, ...prev].slice(0, 5));
+          try {
+            const msg = await generateFocusMessage(profile.role, session.topic);
+            setRadioMessages(prev => [msg, ...prev].slice(0, 10));
+          } catch (err) {
+            console.error("Failed to generate focus message:", err);
+          }
         }
       }, 30000);
       return () => clearInterval(interval);
     }
-  }, [session, profile]);
+  }, [session?.id, session?.active, session?.topic, profile?.role]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [radioMessages]);
+
+  const toggleAudio = () => {
+    const newState = !audioActive;
+    setAudioActive(newState);
+    if (newState) {
+      audioService.startAmbient();
+    } else {
+      audioService.stopAmbient();
+    }
+  };
 
   const startSession = async () => {
     if (!topic.trim() || !profile?.vesselId) return;
-    await addDoc(collection(db, 'focus_sessions'), {
-      vesselId: profile.vesselId,
-      active: true,
-      startTime: serverTimestamp(),
-      participants: [profile?.uid],
-      topic
-    });
+    setLoading(true);
+    try {
+      console.log("Starting focus session for topic:", topic);
+      await addDoc(collection(db, 'focus_sessions'), {
+        vesselId: profile.vesselId,
+        active: true,
+        startTime: serverTimestamp(),
+        participants: [profile?.uid],
+        topic: topic.trim()
+      });
+      setTopic('');
+    } catch (error) {
+      console.error("Error starting focus session:", error);
+      handleFirestoreError(error, OperationType.CREATE, 'focus_sessions');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const endSession = async () => {
     if (session) {
-      await deleteDoc(doc(db, 'focus_sessions', session.id));
+      setLoading(true);
+      try {
+        await deleteDoc(doc(db, 'focus_sessions', session.id));
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `focus_sessions/${session.id}`);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -1170,7 +1236,7 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
         
         {session?.active && (
           <button 
-            onClick={() => setAudioActive(!audioActive)}
+            onClick={toggleAudio}
             className={cn(
               "p-3 rounded-full border transition-all shadow-[0_0_15px_rgba(0,0,0,0.2)]",
               audioActive ? "bg-rose-500/20 border-rose-500 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]" : "border-white/10 text-rose-200/40 hover:text-rose-200"
@@ -1182,7 +1248,7 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
       </div>
 
       {!session?.active ? (
-        <div className="flex-1 flex flex-col items-center justify-center space-y-8">
+        <div className="flex-1 flex flex-col items-center justify-center space-y-8 min-h-0">
           <div className="w-full max-w-md space-y-4">
             <input 
               value={topic}
@@ -1192,15 +1258,16 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
             />
             <button 
               onClick={startSession}
-              className="w-full py-4 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-2xl uppercase tracking-widest hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(244,63,94,0.3)]"
+              disabled={loading || !topic.trim()}
+              className="w-full py-4 bg-gradient-to-r from-rose-500 to-indigo-500 text-white font-bold rounded-2xl uppercase tracking-widest hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(244,63,94,0.3)] disabled:opacity-50"
             >
-              Ignite Rocket
+              {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'Ignite Rocket'}
             </button>
           </div>
           <p className="text-rose-200/40 font-mono text-[10px] uppercase tracking-widest">Ambient Noise: Nuclear Reactor Hum (Standby)</p>
         </div>
       ) : (
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-0">
           <div className="space-y-8 flex flex-col justify-center">
             <div className="space-y-2">
               <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-rose-400">Current Trajectory</p>
@@ -1214,20 +1281,35 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
               </div>
               <button 
                 onClick={endSession}
-                className="w-full py-3 border border-red-500/30 text-red-400/80 rounded-xl text-xs uppercase font-bold hover:bg-red-500/5 transition-all"
+                disabled={loading}
+                className="w-full py-3 border border-red-500/30 text-red-400/80 rounded-xl text-xs uppercase font-bold hover:bg-red-500/5 transition-all disabled:opacity-50"
               >
-                Abort Mission
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Abort Mission'}
               </button>
             </div>
           </div>
 
-          <div className="bg-black/20 border border-white/10 rounded-2xl p-6 flex flex-col backdrop-blur-sm shadow-[0_0_20px_rgba(0,0,0,0.3)]">
-            <div className="flex items-center gap-2 mb-6">
-              <Radio className="w-4 h-4 text-rose-400" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Radio Comms Feed</span>
+          <div className="bg-black/20 border border-white/10 rounded-2xl p-6 flex flex-col backdrop-blur-sm shadow-[0_0_20px_rgba(0,0,0,0.3)] min-h-0 overflow-hidden">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Radio className="w-4 h-4 text-rose-400" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Radio Comms Feed</span>
+              </div>
+              {audioActive && (
+                <div className="flex gap-0.5 items-end h-3">
+                  {[...Array(4)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ height: [4, 12, 4] }}
+                      transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
+                      className="w-0.5 bg-rose-400/60"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
             
-            <div className="flex-1 space-y-4 overflow-y-auto">
+            <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar min-h-0" ref={scrollRef}>
               {radioMessages.map((msg, i) => (
                 <motion.div 
                   key={i}

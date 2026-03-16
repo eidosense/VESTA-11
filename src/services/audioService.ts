@@ -100,6 +100,58 @@ class AudioService {
     createHarmonic(659.25, now, 5, 0.05); // E5
   }
 
+  private ambientOsc: OscillatorNode | null = null;
+  private ambientGain: GainNode | null = null;
+
+  startAmbient() {
+    this.init();
+    if (!this.ctx || this.ambientOsc) return;
+    
+    this.ambientOsc = this.ctx.createOscillator();
+    this.ambientGain = this.ctx.createGain();
+    
+    this.ambientOsc.type = 'sine';
+    this.ambientOsc.frequency.setValueAtTime(55, this.ctx.currentTime); // Low G
+    
+    this.ambientGain.gain.setValueAtTime(0, this.ctx.currentTime);
+    this.ambientGain.gain.linearRampToValueAtTime(0.02, this.ctx.currentTime + 2);
+    
+    // Add a second oscillator for a richer drone
+    const osc2 = this.ctx.createOscillator();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(110, this.ctx.currentTime); // G2
+    const gain2 = this.ctx.createGain();
+    gain2.gain.value = 0.01;
+    osc2.connect(gain2);
+    gain2.connect(this.ambientGain);
+    osc2.start();
+    
+    this.ambientOsc.connect(this.ambientGain);
+    this.ambientGain.connect(this.ctx.destination);
+    
+    this.ambientOsc.start();
+    
+    // Store osc2 to stop it later
+    (this.ambientOsc as any)._secondary = osc2;
+  }
+
+  stopAmbient() {
+    if (this.ambientGain && this.ctx) {
+      const now = this.ctx.currentTime;
+      this.ambientGain.gain.linearRampToValueAtTime(0, now + 1);
+      setTimeout(() => {
+        if (this.ambientOsc) {
+          this.ambientOsc.stop();
+          if ((this.ambientOsc as any)._secondary) {
+            (this.ambientOsc as any)._secondary.stop();
+          }
+          this.ambientOsc = null;
+          this.ambientGain = null;
+        }
+      }, 1100);
+    }
+  }
+
   playAmbient() {
     this.init();
     if (!this.ctx) return;
