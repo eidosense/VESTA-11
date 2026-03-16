@@ -489,7 +489,8 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [showFusion, setShowFusion] = useState(false);
   const [bgImage, setBgImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'art' | 'thought-stream'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'mission-control' | 'art' | 'thought-stream' | 'archive' | 'focus'>('brain-dump');
+  const [showMore, setShowMore] = useState(false);
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
@@ -848,10 +849,82 @@ export default function App() {
                 {activeTab === 'art' && <ArtView profile={profile} />}
                 {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
                 {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
+                {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
+                {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
+                {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}
+                {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
+                {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
+                {activeTab === 'focus' && <DopamineRocketView profile={profile} />}
               </motion.div>
             </AnimatePresence>
           </div>
         </main>
+
+        <AnimatePresence>
+          {showMore && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-24 left-4 right-4 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 z-40 grid grid-cols-3 gap-6 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+            >
+              <button onClick={() => { setActiveTab('mission-log'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookOpen className="w-5 h-5 text-rose-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Log</span>
+              </button>
+              <button onClick={() => { setActiveTab('mission-control'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ClipboardList className="w-5 h-5 text-indigo-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Tasks</span>
+              </button>
+              <button onClick={() => { setActiveTab('secrets'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-fuchsia-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Lock className="w-5 h-5 text-fuchsia-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Secrets</span>
+              </button>
+              <button onClick={() => { setActiveTab('breath'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Wind className="w-5 h-5 text-emerald-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Breath</span>
+              </button>
+              <button onClick={() => { setActiveTab('archive'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Archive className="w-5 h-5 text-amber-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Archive</span>
+              </button>
+              <button onClick={() => { setActiveTab('focus'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Radio className="w-5 h-5 text-orange-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Focus</span>
+              </button>
+              <button onClick={() => { setActiveTab('art'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Palette className="w-5 h-5 text-purple-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Art</span>
+              </button>
+              <button onClick={() => { setActiveTab('time-warp'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Time Warp</span>
+              </button>
+              <button onClick={() => { setActiveTab('settings'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-slate-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Settings className="w-5 h-5 text-slate-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Settings</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Bottom Navigation Bar */}
         <nav className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl border-t border-white/5 pb-safe z-50">
@@ -861,6 +934,7 @@ export default function App() {
               onClick={() => {
                 audioService.playClick();
                 setActiveTab('brain-dump');
+                setShowMore(false);
               }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all duration-300",
@@ -876,6 +950,7 @@ export default function App() {
               onClick={() => {
                 audioService.playClick();
                 setActiveTab('space');
+                setShowMore(false);
               }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all duration-300",
@@ -891,6 +966,7 @@ export default function App() {
               onClick={() => {
                 audioService.playClick();
                 setActiveTab('astront');
+                setShowMore(false);
               }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all duration-300",
@@ -909,6 +985,7 @@ export default function App() {
                 onClick={() => {
                   audioService.playFusion();
                   setActiveTab('parallax');
+                  setShowMore(false);
                 }}
                 className={cn(
                   "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 relative z-10",
@@ -925,26 +1002,12 @@ export default function App() {
               </div>
             </div>
 
-            {/* Art */}
-            <button
-              onClick={() => {
-                audioService.playClick();
-                setActiveTab('art');
-              }}
-              className={cn(
-                "flex flex-col items-center gap-1 transition-all duration-300",
-                activeTab === 'art' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
-              )}
-            >
-              <Palette className="w-5 h-5" />
-              <span className="text-[8px] font-mono uppercase tracking-widest">Art</span>
-            </button>
-
-            {/* Thought Stream */}
+            {/* Stream */}
             <button
               onClick={() => {
                 audioService.playClick();
                 setActiveTab('thought-stream');
+                setShowMore(false);
               }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all duration-300",
@@ -955,19 +1018,19 @@ export default function App() {
               <span className="text-[8px] font-mono uppercase tracking-widest">Stream</span>
             </button>
 
-            {/* Time Warp */}
+            {/* More */}
             <button
               onClick={() => {
                 audioService.playClick();
-                setActiveTab('time-warp');
+                setShowMore(!showMore);
               }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all duration-300",
-                activeTab === 'time-warp' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+                showMore ? "text-rose-400 scale-110" : "text-white/30 hover:text-white/50"
               )}
             >
-              <Clock className="w-5 h-5" />
-              <span className="text-[8px] font-mono uppercase tracking-widest">Time Warp</span>
+              <Atom className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">More</span>
             </button>
           </div>
         </nav>
