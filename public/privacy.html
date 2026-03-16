@@ -8,27 +8,37 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #050505;
-            color: #e5e7eb;
+            color: #fce7f3; /* rose-50 */
             line-height: 1.6;
             padding: 2rem;
-            max-w-3xl;
-            margin: 0 auto;
             max-width: 800px;
+            margin: 0 auto;
         }
         h1, h2 {
-            color: #10b981;
+            color: #fb7185; /* rose-400 */
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
         }
         a {
-            color: #34d399;
+            color: #818cf8; /* indigo-400 */
             text-decoration: none;
         }
         a:hover {
             text-decoration: underline;
         }
+        .container {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body>
-    <h1>Privacy Policy for VESTA-11</h1>
+    <div class="container">
+        <h1>Privacy Policy for VESTA-11</h1>
     <p><strong>Effective Date:</strong> March 13, 2026</p>
 
     <h2>1. Introduction</h2>
@@ -60,5 +70,6 @@
 
     <h2>6. Contact Us</h2>
     <p>If you have questions or comments about this policy, you may email us at: <a href="mailto:arya@eidosense.com">arya@eidosense.com</a></p>
+    </div>
 </body>
 </html>

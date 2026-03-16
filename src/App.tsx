@@ -930,6 +930,19 @@ export default function App() {
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Settings</span>
               </button>
+              <button 
+                onClick={() => { 
+                  audioService.playClick(); 
+                  signOut(auth); 
+                  setShowMore(false); 
+                }} 
+                className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group"
+              >
+                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <LogOut className="w-5 h-5 text-rose-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Logout</span>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1731,6 +1744,13 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
               </span>
             </span>
           </button>
+          
+          <p className="text-[10px] font-mono text-rose-200/40 uppercase tracking-widest mt-4">
+            By signing in, you agree to our{" "}
+            <a href="https://terms.vesta11.space" target="_blank" rel="noopener noreferrer" className="text-rose-400 hover:text-rose-300 underline underline-offset-4 transition-colors">Terms</a>
+            {" "}and{" "}
+            <a href="https://privacy.vesta11.space" target="_blank" rel="noopener noreferrer" className="text-rose-400 hover:text-rose-300 underline underline-offset-4 transition-colors">Privacy Policy</a>
+          </p>
         </div>
 
         <div className="pt-8 flex items-center justify-center gap-6">
