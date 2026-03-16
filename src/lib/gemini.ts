@@ -112,6 +112,48 @@ export async function analyzeBrainDump(content: string, role: string, otherUserR
   return response.text;
 }
 
+export async function analyzeThoughtStream(content: string) {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  
+  const prompt = `
+    Analyze the following thought from a neurodivergent astronaut:
+    "${content}"
+    
+    Categorize it into exactly one of these topics: ['Mission', 'Technical', 'Emotional', 'Philosophical', 'Random'].
+    Also extract 3-5 keywords that represent the core themes.
+    
+    Format: Return a JSON object with:
+    - "topic": string
+    - "keywords": string[]
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          topic: { type: Type.STRING, enum: ['Mission', 'Technical', 'Emotional', 'Philosophical', 'Random'] },
+          keywords: { type: Type.ARRAY, items: { type: Type.STRING } }
+        },
+        required: ["topic", "keywords"]
+      }
+    },
+  });
+  
+  try {
+    const text = response.text;
+    const cleanJson = text.replace(/```json\n?|```/g, '').trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error("Failed to parse thought stream analysis:", error);
+    return { topic: 'Random', keywords: [] };
+  }
+}
+
 export async function generateFusionPoem(role: string, sharedHistory: string[]) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
   

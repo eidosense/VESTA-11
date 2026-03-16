@@ -73,6 +73,7 @@ import TimeWarpView from './components/TimeWarpView';
 import SpaceView from './components/SpaceView';
 import ArtView from './components/ArtView';
 import FusionAnimation from './components/FusionAnimation';
+import ThoughtStream from './components/ThoughtStream';
 
 import { audioService } from './services/audioService';
 import { generateBackground } from './services/imageService';
@@ -488,7 +489,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [showFusion, setShowFusion] = useState(false);
   const [bgImage, setBgImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'art'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'art' | 'thought-stream'>('brain-dump');
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
   const [moonData, setMoonData] = useState(getMoonData());
@@ -837,6 +838,10 @@ export default function App() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
+                {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
+                {activeTab === 'thought-stream' && profile && (
+                  <ThoughtStream vesselId={profile.vesselId || ''} userId={profile.uid} userRole={profile.role} />
+                )}
                 {activeTab === 'space' && <SpaceView />}
                 {activeTab === 'astront' && <AstrontView profile={profile} />}
                 {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
@@ -851,6 +856,21 @@ export default function App() {
         {/* Bottom Navigation Bar */}
         <nav className="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-2xl border-t border-white/5 pb-safe z-50">
           <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between relative">
+            {/* Log */}
+            <button
+              onClick={() => {
+                audioService.playClick();
+                setActiveTab('brain-dump');
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300",
+                activeTab === 'brain-dump' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <Brain className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">Log</span>
+            </button>
+
             {/* Space */}
             <button
               onClick={() => {
@@ -918,6 +938,21 @@ export default function App() {
             >
               <Palette className="w-5 h-5" />
               <span className="text-[8px] font-mono uppercase tracking-widest">Art</span>
+            </button>
+
+            {/* Thought Stream */}
+            <button
+              onClick={() => {
+                audioService.playClick();
+                setActiveTab('thought-stream');
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300",
+                activeTab === 'thought-stream' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <Sparkles className="w-5 h-5" />
+              <span className="text-[8px] font-mono uppercase tracking-widest">Stream</span>
             </button>
 
             {/* Time Warp */}
