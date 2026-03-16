@@ -113,7 +113,7 @@ export default function TimeWarpView({ profile }: { profile: any }) {
         <div className="space-y-1">
           <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">
             <Clock className="w-6 h-6 text-rose-400" />
-            Zaman Bükülmesi
+            Time Warp
           </h3>
           <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">
             Time Warp & Shared Mind Palace
