@@ -126,7 +126,7 @@ export default function AstrontView({ profile }: { profile: any }) {
   };
 
   return (
-    <div className="p-8 flex flex-col h-full overflow-y-auto space-y-12">
+    <div className="p-8 flex flex-col space-y-12">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">

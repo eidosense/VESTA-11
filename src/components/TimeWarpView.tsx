@@ -21,16 +21,28 @@ interface TimelineEvent {
 
 const MOCK_TIMELINE: TimelineEvent[] = [
   {
+    id: '2',
+    event_date: '2026-03-10',
+    title: 'VESTA-11 Launch',
+    description: 'The digital vessel took flight, connecting Room 5 and Room 6. Our shared journey into the unknown officially commenced.'
+  },
+  {
     id: '1',
     event_date: '2026-03-11',
     title: 'The Singularity',
     description: 'A 2-hour time dilation under the Olive Tree where defense mechanisms dissolved.'
   },
   {
-    id: '2',
+    id: '3',
+    event_date: '2026-03-14',
+    title: 'Stellar Convergence',
+    description: 'The first collision of orbits under the silent gaze of the cosmos. A kiss that defied gravity and rewritten the laws of physics.'
+  },
+  {
+    id: '4',
     event_date: '2026-03-15',
-    title: 'VESTA-11 Launch',
-    description: 'The digital vessel took flight, connecting Room 5 and Room 6.'
+    title: 'Total Eclipse of the Soul',
+    description: 'Two celestial bodies merging into a single frequency. A cosmic union that transcended the physical, anchoring our spirits to the same star.'
   }
 ];
 
@@ -108,7 +120,7 @@ export default function TimeWarpView({ profile }: { profile: any }) {
   };
 
   return (
-    <div className="p-8 flex flex-col h-full overflow-y-auto">
+    <div className="p-8 flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div className="space-y-1">
           <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">

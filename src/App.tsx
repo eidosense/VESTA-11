@@ -37,6 +37,7 @@ import {
   Send, 
   Loader2,
   TreeDeciduous,
+  Heart,
   Clock,
   Radio,
   Navigation,
@@ -309,7 +310,7 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="p-8 flex flex-col h-full space-y-8 overflow-y-auto"
+      className="p-8 flex flex-col space-y-8"
     >
       <div className="flex items-center justify-between">
         <div className="space-y-1">
@@ -820,9 +821,9 @@ export default function App() {
       <div className="relative z-10 h-screen flex flex-col">
         <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
         
-        <main className="flex-1 overflow-y-auto relative pb-32 scroll-smooth">
-          <div className="max-w-md mx-auto px-4">
-            {skyContext?.current?.resonance?.active && (
+        <main className={cn("flex-1 relative scroll-smooth", (['space', 'brain-dump', 'thought-stream', 'breath', 'focus'].includes(activeTab)) ? "overflow-hidden" : "overflow-y-auto pb-32")}>
+          <div className={cn("mx-auto", (['space', 'brain-dump', 'thought-stream', 'breath', 'focus'].includes(activeTab)) ? "w-full max-w-4xl h-full" : "max-w-md px-4 min-h-full")}>
+            {skyContext?.current?.resonance?.active && activeTab !== 'space' && (
               <div className="sticky top-0 z-50 bg-rose-500/10 border-b border-rose-500/20 px-4 py-2 flex items-center gap-3 backdrop-blur-md rounded-b-xl mb-4">
                 <Zap className="w-3 h-3 text-rose-400 animate-pulse" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-rose-400">
@@ -838,6 +839,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
+                className={cn(['space', 'brain-dump', 'thought-stream', 'breath', 'focus'].includes(activeTab) ? "h-full flex flex-col" : "min-h-full w-full")}
               >
                 {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
                 {activeTab === 'thought-stream' && profile && (
@@ -868,6 +870,12 @@ export default function App() {
               exit={{ opacity: 0, y: 20 }}
               className="fixed bottom-24 left-4 right-4 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 z-40 grid grid-cols-3 gap-6 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
             >
+              <button onClick={() => { setActiveTab('parallax'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
+                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Zap className="w-5 h-5 text-rose-400" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-rose-100/60 group-hover:text-rose-100">Star</span>
+              </button>
               <button onClick={() => { setActiveTab('mission-log'); setShowMore(false); audioService.playClick(); }} className="flex flex-col items-center gap-2 p-3 hover:bg-white/5 rounded-2xl transition-all group">
                 <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <BookOpen className="w-5 h-5 text-rose-400" />
@@ -945,22 +953,6 @@ export default function App() {
               <span className="text-[8px] font-mono uppercase tracking-widest">Log</span>
             </button>
 
-            {/* Space */}
-            <button
-              onClick={() => {
-                audioService.playClick();
-                setActiveTab('space');
-                setShowMore(false);
-              }}
-              className={cn(
-                "flex flex-col items-center gap-1 transition-all duration-300",
-                activeTab === 'space' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
-              )}
-            >
-              <Rocket className="w-5 h-5" />
-              <span className="text-[8px] font-mono uppercase tracking-widest">Space</span>
-            </button>
-
             {/* Astronaut */}
             <button
               onClick={() => {
@@ -977,14 +969,14 @@ export default function App() {
               <span className="text-[8px] font-mono uppercase tracking-widest">Astronaut</span>
             </button>
 
-            {/* Nuclear Fusion Pulse (Center) */}
+            {/* Space (Center) */}
             <div className="relative -top-8">
               <div className="absolute inset-0 bg-rose-500/30 blur-3xl rounded-full animate-pulse" />
               <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full animate-pulse delay-700" />
               <button
                 onClick={() => {
-                  audioService.playFusion();
-                  setActiveTab('parallax');
+                  audioService.playClick();
+                  setActiveTab('space');
                   setShowMore(false);
                 }}
                 className={cn(
@@ -992,13 +984,13 @@ export default function App() {
                   "bg-gradient-to-br from-rose-500 via-purple-600 to-indigo-600 shadow-[0_0_40px_rgba(244,63,94,0.5)]",
                   "hover:shadow-[0_0_60px_rgba(244,63,94,0.7)] hover:scale-110 active:scale-95",
                   "border-2",
-                  activeTab === 'parallax' ? "border-white" : "border-white/30"
+                  activeTab === 'space' ? "border-white" : "border-white/30"
                 )}
               >
-                <Zap className="w-8 h-8 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]" />
+                <Rocket className="w-8 h-8 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]" />
               </button>
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-mono uppercase tracking-[0.2em] text-rose-400 font-bold whitespace-nowrap drop-shadow-sm">
-                Star
+                Space
               </div>
             </div>
 
@@ -1287,7 +1279,7 @@ function HalfLifeSecretsView({ profile, addSR }: { profile: UserProfile | null, 
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="p-8 flex flex-col h-full space-y-8 overflow-y-auto"
+      className="p-8 flex flex-col space-y-8"
     >
       <div className="space-y-1">
         <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">
@@ -1465,6 +1457,22 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
 function OnboardingAnimation() {
   return (
     <div className="relative w-64 h-64 mx-auto flex items-center justify-center overflow-visible">
+      {/* Olive Tree Background */}
+      <motion.div
+        className="absolute opacity-10"
+        animate={{
+          scale: [0.8, 1, 0.8],
+          opacity: [0.05, 0.15, 0.05]
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <TreeDeciduous className="w-48 h-48 text-emerald-500" />
+      </motion.div>
+
       {/* Number 5 */}
       <motion.div
         className="absolute flex items-center justify-center"
@@ -1505,7 +1513,7 @@ function OnboardingAnimation() {
         <div className="text-6xl font-bold italic text-indigo-400">6</div>
       </motion.div>
 
-      {/* Number 11 */}
+      {/* Number 11 (Merged) */}
       <motion.div
         className="absolute flex items-center justify-center"
         animate={{
@@ -1519,7 +1527,27 @@ function OnboardingAnimation() {
           ease: "easeInOut"
         }}
       >
-        <div className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">11</div>
+        <div className="flex -space-x-4">
+          <div className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">1</div>
+          <div className="text-8xl font-bold italic text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">1</div>
+        </div>
+      </motion.div>
+
+      {/* Heart Pulse when they merge */}
+      <motion.div
+        className="absolute flex items-center justify-center"
+        animate={{
+          scale: [0, 0, 1.5, 1, 0, 0],
+          opacity: [0, 0, 0.8, 0.4, 0, 0],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          times: [0, 0.32, 0.38, 0.5, 0.6, 1],
+          ease: "easeOut"
+        }}
+      >
+        <Heart className="w-24 h-24 text-rose-500 fill-rose-500 blur-[2px]" />
       </motion.div>
 
       {/* Left 1 -> Astronaut */}
@@ -1741,29 +1769,45 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
 
 function SplashScreen({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
-    const timer = setTimeout(onComplete, 4000);
+    const timer = setTimeout(onComplete, 7000);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex items-center justify-center w-full h-full">
         {/* 5 Energy */}
         <motion.div
-          initial={{ x: -100, opacity: 0, scale: 0.5 }}
-          animate={{ x: -20, opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="text-8xl font-bold italic text-indigo-500 drop-shadow-[0_0_20px_rgba(99,102,241,0.5)]"
+          initial={{ x: -150, opacity: 0, scale: 0.5 }}
+          animate={{ 
+            x: [-150, -20, 0], 
+            opacity: [0, 1, 0],
+            scale: [0.5, 1, 1.2]
+          }}
+          transition={{ 
+            duration: 2.5, 
+            times: [0, 0.6, 1],
+            ease: "easeOut" 
+          }}
+          className="absolute text-8xl font-bold italic text-indigo-500 drop-shadow-[0_0_20px_rgba(99,102,241,0.5)]"
         >
           5
         </motion.div>
         
         {/* 6 Energy */}
         <motion.div
-          initial={{ x: 100, opacity: 0, scale: 0.5 }}
-          animate={{ x: 20, opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="text-8xl font-bold italic text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.5)]"
+          initial={{ x: 150, opacity: 0, scale: 0.5 }}
+          animate={{ 
+            x: [150, 20, 0], 
+            opacity: [0, 1, 0],
+            scale: [0.5, 1, 1.2]
+          }}
+          transition={{ 
+            duration: 2.5, 
+            times: [0, 0.6, 1],
+            ease: "easeOut" 
+          }}
+          className="absolute text-8xl font-bold italic text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.5)]"
         >
           6
         </motion.div>
@@ -1771,29 +1815,90 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
         {/* Fusion Effect */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: [0, 2, 1], opacity: [0, 1, 0] }}
-          transition={{ delay: 1.5, duration: 1 }}
-          className="absolute inset-0 bg-white rounded-full blur-3xl"
+          animate={{ 
+            scale: [0, 2.5, 0], 
+            opacity: [0, 1, 0] 
+          }}
+          transition={{ delay: 1.8, duration: 1.2 }}
+          className="absolute bg-white rounded-full blur-3xl w-64 h-64"
         />
 
-        {/* Resulting 11 */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1.2 }}
-          transition={{ delay: 2, duration: 0.5, type: "spring" }}
-          className="absolute text-9xl font-bold italic text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.8)]"
+        {/* Resulting 11 and Transformation */}
+        <motion.div 
+          initial={{ y: 0, opacity: 0 }}
+          animate={{ 
+            y: [0, 0, -1000],
+            opacity: [0, 1, 1, 0],
+            scale: [0.8, 1, 1, 0.5]
+          }}
+          transition={{ 
+            delay: 2.5, 
+            duration: 5, 
+            times: [0, 0.1, 0.8, 1], 
+            ease: "easeInOut" 
+          }}
+          className="relative flex gap-16"
         >
-          11
+          {/* First Astronaut (from first '1') */}
+          <motion.div
+            className="flex flex-col items-center relative"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 0.2] }}
+              transition={{ delay: 2.5, duration: 1.5 }}
+              className="text-9xl font-bold italic text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.8)]"
+            >
+              1
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 3.2, duration: 0.8 }}
+              className="absolute top-1/2 -translate-y-1/2"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-indigo-500/50 blur-2xl rounded-full animate-pulse" />
+                <User className="w-20 h-20 text-white relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Second Astronaut (from second '1') */}
+          <motion.div
+            className="flex flex-col items-center relative"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 0.2] }}
+              transition={{ delay: 2.5, duration: 1.5 }}
+              className="text-9xl font-bold italic text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.8)]"
+            >
+              1
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 3.2, duration: 0.8 }}
+              className="absolute top-1/2 -translate-y-1/2"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-rose-500/50 blur-2xl rounded-full animate-pulse" />
+                <User className="w-20 h-20 text-white relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
+              </div>
+            </motion.div>
+          </motion.div>
         </motion.div>
       </div>
       
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
-        className="absolute bottom-20 text-white/40 font-mono text-xs uppercase tracking-[0.3em]"
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ delay: 2.5, duration: 4, times: [0, 0.2, 0.9] }}
+        className="absolute bottom-20 text-white/40 font-mono text-xs uppercase tracking-[0.3em] text-center"
       >
-        The Singularity Alignment
+        The Singularity Alignment<br/>
+        <span className="text-[10px] opacity-60">Arya & Hayden</span>
       </motion.div>
     </div>
   );
@@ -1824,6 +1929,79 @@ function CosmicDust() {
           className="absolute w-1 h-1 bg-white rounded-full blur-[1px]"
         />
       ))}
+    </div>
+  );
+}
+
+function NuclearOliveTree() {
+  const singularityDate = new Date('2026-03-11');
+  const today = new Date();
+  const diffTime = Math.abs(today.getTime() - singularityDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Growth logic: one leaf per day since singularity
+  const leafCount = Math.max(1, Math.min(diffDays, 150)); 
+
+  return (
+    <div className="relative w-12 h-12 flex items-center justify-center">
+      <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+        <defs>
+          <radialGradient id="nuclearGradient">
+            <stop offset="0%" stopColor="#fff" />
+            <stop offset="40%" stopColor="#fb7185" />
+            <stop offset="100%" stopColor="#4f46e5" />
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Roots - anchoring into crescent earth */}
+        <path d="M50 75 Q40 85 30 90 M50 75 Q50 88 50 95 M50 75 Q60 85 70 90" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2" />
+        <path d="M35 92 Q50 85 65 92" stroke="white" strokeWidth="1" fill="none" opacity="0.4" />
+
+        {/* Trunk - Parallel lines forming 11 */}
+        <motion.line x1="48" y1="75" x2="48" y2="45" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+        <motion.line x1="52" y1="75" x2="52" y2="45" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+
+        {/* Nuclear Core - Pulsating Sun */}
+        <motion.circle 
+          cx="50" cy="60" r="5" 
+          fill="url(#nuclearGradient)"
+          filter="url(#glow)"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Leaves - Silver-green cosmic dust */}
+        {[...Array(leafCount)].map((_, i) => {
+          const angle = (i * 137.5) % 360; 
+          const radius = 8 + Math.sqrt(i) * 3.5;
+          const x = 50 + radius * Math.cos(angle * Math.PI / 180);
+          const y = 45 - radius * Math.sin(angle * Math.PI / 180);
+          
+          return (
+            <motion.circle
+              key={i}
+              cx={x} cy={y} r="1.2"
+              fill={i % 2 === 0 ? "#d1d5db" : "#a7f3d0"}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: [0.4, 0.8, 0.4], scale: [1, 1.2, 1] }}
+              transition={{ 
+                delay: i * 0.02, 
+                duration: 2 + Math.random() * 2, 
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="drop-shadow-[0_0_1px_rgba(255,255,255,0.5)]"
+            />
+          );
+        })}
+      </svg>
     </div>
   );
 }
@@ -1877,38 +2055,30 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
         />
       </div>
       
-      <header className="border-b border-white/10 p-6 flex items-center justify-between max-w-7xl mx-auto w-full bg-black/20 backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <div className={`w-10 h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center transition-all duration-1000 ${treeGlow}`}>
-            <TreeDeciduous className={`w-5 h-5 transition-colors duration-1000 ${treeColor}`} />
+      <header className="border-b border-white/10 py-2 px-6 flex items-center justify-between max-w-7xl mx-auto w-full bg-black/20 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className={`transition-all duration-1000 ${treeGlow} scale-75 origin-left`}>
+            <NuclearOliveTree />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white tracking-tight uppercase italic">VESTA-11</h2>
+            <h2 className="text-xs font-bold text-white tracking-tight uppercase italic">VESTA-11</h2>
             <div className="flex items-center gap-2">
-              <p className="text-[10px] text-rose-200/60 font-mono uppercase tracking-widest">
-                {profile?.role} // Room {profile?.role === 'Commander' ? '5' : '6'}
+              <p className="text-[9px] text-rose-200/60 font-mono uppercase tracking-widest">
+                {profile?.email === 'arya@eidosense.com' ? 'Commander Arya' : 
+                 profile?.email === 'Haydena.forster@gmail.com' ? 'Commander Hayden' : 
+                 profile?.role} // {profile?.role === 'Commander' ? '5' : '6'}
               </p>
-              <span className="text-[10px] text-rose-400 font-mono uppercase tracking-widest bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                {rank} ({sr} SR)
-              </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onSettingsClick}
-            className="p-2 text-rose-200/40 hover:text-rose-200 transition-colors flex items-center gap-2 group"
-          >
-            <span className="text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Settings</span>
-            <Settings className="w-5 h-5" />
-          </button>
-          <button 
-            onClick={() => signOut(auth)}
-            className="p-2 text-rose-200/40 hover:text-rose-200 transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end">
+            <span className="text-[9px] font-mono text-rose-200/40 uppercase tracking-tighter">{sr} SR</span>
+            <div className="w-16 h-0.5 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-rose-500" style={{ width: `${progressPercent}%` }} />
+            </div>
+          </div>
         </div>
       </header>
     </div>
@@ -1993,7 +2163,13 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !profile?.vesselId) return;
+    if (!input.trim()) return;
+    
+    if (!profile?.vesselId) {
+      console.error("No vessel ID found for profile");
+      // You might want to show a toast here if you have a toast system
+      return;
+    }
 
     setSending(true);
     try {
@@ -2060,25 +2236,21 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="flex flex-col h-full"
+      className="flex flex-col h-full max-w-4xl mx-auto w-full pb-24"
     >
-      <div className="p-4 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-black/20 backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
-            <span className="text-xs font-mono uppercase tracking-widest text-rose-200/60">Subspace Frequency: Active</span>
-            <div className="flex items-end gap-[2px] h-3 ml-2">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ height: ['20%', '100%', '20%'] }}
-                  transition={{ duration: 1 + Math.random(), repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
-                  className="w-1 bg-rose-400/60 rounded-full"
-                />
-              ))}
-            </div>
+      <div className="p-4 border-b border-white/10 flex flex-col gap-2 bg-black/20 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <h3 className="text-sm font-bold text-white tracking-tighter uppercase italic">Subspace Communication Log</h3>
+            <p className="text-[9px] text-rose-200/40 font-mono uppercase tracking-widest">Neural Link Active // Direct thought transmission & VESTA-11 analysis</p>
           </div>
-          
+          <div className="flex items-center gap-2 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[8px] font-mono uppercase tracking-widest text-emerald-400">Neural Sync Active</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
           <div className="flex gap-2">
             <button 
               onClick={() => setFilter('all')}
@@ -2099,16 +2271,16 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
               VESTA-11
             </button>
           </div>
+          
+          <button
+            onClick={handlePredictiveAnalysis}
+            disabled={generatingPrediction || messages.length < 2}
+            className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 rounded-lg text-indigo-200 text-[10px] font-mono uppercase tracking-widest transition-colors disabled:opacity-50"
+          >
+            {generatingPrediction ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
+            Predictive Analysis
+          </button>
         </div>
-        
-        <button
-          onClick={handlePredictiveAnalysis}
-          disabled={generatingPrediction || messages.length < 2}
-          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 rounded-lg text-indigo-200 text-xs font-mono uppercase tracking-widest transition-colors disabled:opacity-50"
-        >
-          {generatingPrediction ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
-          Predictive Analysis
-        </button>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -2190,11 +2362,12 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
         <input 
           value={input}
           onChange={handleInputChange}
-          placeholder="Initiate brain dump..."
+          placeholder="Transmit a message to the shared void..."
           className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-rose-500/50 transition-colors text-rose-50"
         />
         <button 
-          disabled={sending}
+          type="submit"
+          disabled={sending || !input.trim()}
           className="p-2 bg-gradient-to-r from-rose-500 to-indigo-500 text-white rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-[0_0_15px_rgba(244,63,94,0.3)]"
         >
           {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -2225,32 +2398,40 @@ function MissionControlView({ profile, addSR }: { profile: UserProfile | null, a
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim() || !profile?.vesselId) return;
-    await addDoc(collection(db, 'tasks'), {
-      vesselId: profile.vesselId,
-      title: newTask,
-      status: 'pending',
-      category,
-      createdAt: serverTimestamp(),
-      assignedTo: profile?.uid
-    });
-    setNewTask('');
+    try {
+      await addDoc(collection(db, 'tasks'), {
+        vesselId: profile.vesselId,
+        title: newTask,
+        status: 'pending',
+        category,
+        createdAt: serverTimestamp(),
+        assignedTo: profile?.uid
+      });
+      setNewTask('');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'tasks');
+    }
   };
 
   const toggleTask = async (task: Task) => {
-    const isCompleting = task.status === 'pending';
-    await updateDoc(doc(db, 'tasks', task.id), {
-      status: isCompleting ? 'completed' : 'pending'
-    });
-    
-    if (isCompleting && task.category === 'Life Support') {
-      addSR(10, "Life Support Task Completed");
+    try {
+      const isCompleting = task.status === 'pending';
+      await updateDoc(doc(db, 'tasks', task.id), {
+        status: isCompleting ? 'completed' : 'pending'
+      });
+      
+      if (isCompleting && task.category === 'Life Support') {
+        addSR(10, "Life Support Task Completed");
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `tasks/${task.id}`);
     }
   };
 
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="p-6 space-y-8 h-full overflow-y-auto"
+      className="p-6 space-y-8"
     >
       <div className="space-y-4">
         <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2 text-rose-50">
@@ -2380,7 +2561,7 @@ function StellarParallaxView({ profile, otherPresence, moonData }: { profile: Us
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="p-6 space-y-8 h-full flex flex-col items-center justify-center relative overflow-hidden"
+      className="p-6 space-y-8 flex flex-col items-center relative"
     >
       {/* Background Star Map (2026) */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -2555,7 +2736,7 @@ function MissionLogView({ profile, addSR }: { profile: UserProfile | null, addSR
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="flex flex-col h-full p-6 space-y-6 overflow-y-auto"
+      className="flex flex-col p-6 space-y-6"
     >
       <div className="flex items-center gap-3 mb-4">
         <BookOpen className="w-6 h-6 text-rose-400" />
@@ -2710,7 +2891,7 @@ function ArchiveView({ profile, addSR }: { profile: UserProfile | null, addSR: (
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="p-6 space-y-8 h-full overflow-y-auto"
+      className="p-6 space-y-8"
     >
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold italic uppercase tracking-tight flex items-center gap-2 text-rose-50">

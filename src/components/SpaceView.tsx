@@ -150,8 +150,8 @@ export default function SpaceView() {
   }, []);
 
   return (
-    <div className="w-full h-full relative bg-black rounded-2xl overflow-hidden">
-      <div className="absolute top-4 left-4 z-10 pointer-events-none">
+    <div className="w-full h-full relative overflow-hidden">
+      <div className="absolute top-6 left-6 z-10 pointer-events-none">
         <h3 className="text-2xl font-bold italic uppercase tracking-tight text-rose-50 drop-shadow-md">
           Orbital Space
         </h3>

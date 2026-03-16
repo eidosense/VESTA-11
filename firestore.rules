@@ -101,8 +101,9 @@ service cloud.firestore {
 
     // Tasks
     match /tasks/{taskId} {
-      allow read: if isMember(resource.data.vesselId);
-      allow create, update, delete: if isMember(request.resource.data.vesselId || resource.data.vesselId);
+      allow read: if isAuthenticated() && isMember(resource.data.vesselId);
+      allow create: if isAuthenticated() && isMember(request.resource.data.vesselId);
+      allow update, delete: if isAuthenticated() && isMember(resource.data.vesselId);
     }
 
     // Fusion Pulses

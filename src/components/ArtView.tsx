@@ -99,14 +99,16 @@ export default function ArtView({ profile, addSR }: { profile: any, addSR?: (amo
     if (!ctx) return;
 
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     let x, y;
 
     if ('touches' in e) {
-      x = e.touches[0].clientX - rect.left;
-      y = e.touches[0].clientY - rect.top;
+      x = (e.touches[0].clientX - rect.left) * scaleX;
+      y = (e.touches[0].clientY - rect.top) * scaleY;
     } else {
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
+      x = (e.clientX - rect.left) * scaleX;
+      y = (e.clientY - rect.top) * scaleY;
     }
 
     ctx.lineWidth = brushSize;
@@ -235,7 +237,7 @@ export default function ArtView({ profile, addSR }: { profile: any, addSR?: (amo
   }, []);
 
   return (
-    <div className="p-8 flex flex-col h-full overflow-y-auto">
+    <div className="p-8 flex flex-col">
       <div className="flex flex-col gap-6 mb-8">
         <div className="space-y-1">
           <h3 className="text-2xl font-bold italic uppercase tracking-tight flex items-center gap-3 text-rose-50">
