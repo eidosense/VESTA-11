@@ -795,7 +795,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <LoginScreen moonData={moonData} inviteError={inviteError} />;
+    return <LoginScreen moonData={moonData} inviteError={inviteError} bgImage={bgImage} />;
   }
 
   return (
@@ -1645,7 +1645,7 @@ function OnboardingAnimation() {
   );
 }
 
-function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: string | null }) {
+function LoginScreen({ moonData, inviteError, bgImage }: { moonData: any, inviteError: string | null, bgImage: string | null }) {
   const [typewriterText, setTypewriterText] = useState('');
   const fullText = "System check... Heartbeat synchronized. Navigation Locked. 11:03 is active.";
 
@@ -1675,7 +1675,7 @@ function LoginScreen({ moonData, inviteError }: { moonData: any, inviteError: st
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-60 scale-110 animate-slow-pan"
         style={{ 
-          backgroundImage: `url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop')`,
+          backgroundImage: `url('${bgImage || 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop'}')`,
           filter: `brightness(${0.6 * coreBrightness}) contrast(1.1) saturate(1.2)`
         }}
       />
@@ -2303,7 +2303,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
         {prediction && (
           <div className="max-w-[90%] mx-auto p-6 rounded-2xl bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.15)] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />

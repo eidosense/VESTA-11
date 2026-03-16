@@ -237,12 +237,26 @@ export default function ThoughtStream({ vesselId, userId, userRole }: { vesselId
     setIsPanning(false);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (viewMode === 'list') return;
+    setIsPanning(true);
+    setStartPan({ x: e.touches[0].clientX - pan.x, y: e.touches[0].clientY - pan.y });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPanning || viewMode === 'list') return;
+    setPan({
+      x: e.touches[0].clientX - startPan.x,
+      y: e.touches[0].clientY - startPan.y
+    });
+  };
+
   const resetPan = () => {
     setPan({ x: 0, y: 0 });
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#050505] flex flex-col">
+    <div className="relative h-full w-full overflow-hidden bg-[#050505] flex flex-col pb-24">
       {/* Background Stars */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         {[...Array(50)].map((_, i) => (
@@ -304,6 +318,9 @@ export default function ThoughtStream({ vesselId, userId, userRole }: { vesselId
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleMouseUp}
           className={cn(
             "flex-1 relative overflow-hidden",
             isPanning ? "cursor-grabbing" : "cursor-grab"
@@ -402,7 +419,7 @@ export default function ThoughtStream({ vesselId, userId, userRole }: { vesselId
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/20">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/20 min-h-0">
           {thoughts.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-white/20 space-y-4">
               <Activity className="w-12 h-12 animate-pulse" />
