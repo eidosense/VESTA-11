@@ -53,6 +53,7 @@ import {
   UserPlus,
   Copy,
   Link,
+  Users,
   X,
   BookOpen,
   Save,
@@ -236,7 +237,11 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   // We don't throw here to avoid crashing the app, but we log it as requested
 }
 
-function SettingsView({ profile, setProfile }: { profile: UserProfile | null, setProfile: (p: UserProfile) => void }) {
+function SettingsView({ profile, setProfile, otherPresence }: { 
+  profile: UserProfile | null, 
+  setProfile: (p: UserProfile) => void,
+  otherPresence: Presence | null
+}) {
   const [displayName, setDisplayName] = useState(profile?.displayName || '');
   const [role, setRole] = useState(profile?.role || 'Lead Engineer');
   const [notifications, setNotifications] = useState(profile?.preferences?.notifications ?? true);
@@ -399,6 +404,65 @@ function SettingsView({ profile, setProfile }: { profile: UserProfile | null, se
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Crew Sync Section */}
+        <div className="md:col-span-2 space-y-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Users className="w-5 h-5 text-emerald-400" />
+              <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-50">Crew Synchronization</h4>
+            </div>
+            {otherPresence && (
+              <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Partner Linked</span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="p-4 bg-white/5 rounded-xl border border-white/5 space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Current Vessel ID</p>
+              <p className="text-xs font-mono text-rose-100">{profile?.vesselId}</p>
+            </div>
+
+            {!otherPresence && (
+              <div className="space-y-4">
+                <p className="text-xs text-rose-200/60 leading-relaxed">
+                  To synchronize with Hayden, generate an invitation link and share it. Once Hayden joins your vessel, all focus sessions, logs, and presence will be synchronized in real-time.
+                </p>
+                
+                {inviteLink ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        readOnly
+                        value={inviteLink}
+                        className="flex-1 bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-xs font-mono text-rose-200/60"
+                      />
+                      <button 
+                        onClick={() => copyToClipboard(inviteLink)}
+                        className="p-2 bg-rose-500/20 border border-rose-500/30 rounded-lg text-rose-400 hover:bg-rose-500/30 transition-all"
+                      >
+                        {copySuccess ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest">Link generated. Send this to Hayden.</p>
+                  </div>
+                ) : (
+                    <button 
+                      onClick={generateInvite}
+                      disabled={generatingInvite}
+                      className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-50"
+                    >
+                      {generatingInvite ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link className="w-4 h-4" />}
+                      Generate Sync Link
+                    </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -819,7 +883,13 @@ export default function App() {
       <CosmicDust />
 
       <div className="relative z-10 h-screen flex flex-col">
-        <Header profile={profile} vessel={vessel} onSettingsClick={() => setActiveTab('settings')} />
+        <Header 
+          profile={profile} 
+          vessel={vessel} 
+          otherPresence={otherPresence}
+          addSR={addSR}
+          onSettingsClick={() => setActiveTab('settings')} 
+        />
         
         <main className={cn("flex-1 relative scroll-smooth", (['space', 'brain-dump', 'thought-stream', 'breath', 'focus'].includes(activeTab)) ? "overflow-hidden" : "overflow-y-auto pb-32")}>
           <div className={cn("mx-auto", (['space', 'brain-dump', 'thought-stream', 'breath', 'focus'].includes(activeTab)) ? "w-full max-w-4xl h-full" : "max-w-md px-4 min-h-full")}>
@@ -850,13 +920,13 @@ export default function App() {
                 {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
                 {activeTab === 'art' && <ArtView profile={profile} />}
                 {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
-                {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} />}
+                {activeTab === 'settings' && <SettingsView profile={profile} setProfile={setProfile} otherPresence={otherPresence} />}
                 {activeTab === 'mission-log' && <MissionLogView profile={profile} addSR={addSR} />}
                 {activeTab === 'mission-control' && <MissionControlView profile={profile} addSR={addSR} />}
                 {activeTab === 'secrets' && <HalfLifeSecretsView profile={profile} addSR={addSR} />}
                 {activeTab === 'breath' && <SyncBreathView profile={profile} otherPresence={otherPresence} />}
                 {activeTab === 'archive' && <ArchiveView profile={profile} addSR={addSR} />}
-                {activeTab === 'focus' && <DopamineRocketView profile={profile} />}
+                {activeTab === 'focus' && <DopamineRocketView profile={profile} otherPresence={otherPresence} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -1102,7 +1172,7 @@ export default function App() {
 
 // --- New Module Views ---
 
-function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
+function DopamineRocketView({ profile, otherPresence }: { profile: UserProfile | null, otherPresence: Presence | null }) {
   const [session, setSession] = useState<FocusSession | null>(null);
   const [topic, setTopic] = useState('');
   const [radioMessages, setRadioMessages] = useState<string[]>([]);
@@ -1220,6 +1290,21 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
     }
   };
 
+  const joinSession = async () => {
+    if (session && profile && !session.participants.includes(profile.uid)) {
+      setLoading(true);
+      try {
+        await updateDoc(doc(db, 'focus_sessions', session.id), {
+          participants: [...session.participants, profile.uid]
+        });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `focus_sessions/${session.id}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -1279,13 +1364,35 @@ function DopamineRocketView({ profile }: { profile: UserProfile | null }) {
                 <span className="text-[10px] font-mono uppercase tracking-widest text-rose-200/40">Mission Duration</span>
                 <span className="text-rose-400 font-mono">ACTIVE</span>
               </div>
-              <button 
-                onClick={endSession}
-                disabled={loading}
-                className="w-full py-3 border border-red-500/30 text-red-400/80 rounded-xl text-xs uppercase font-bold hover:bg-red-500/5 transition-all disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Abort Mission'}
-              </button>
+              
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                    <User className="w-3 h-3 text-rose-400" />
+                  </div>
+                  <span className="text-[10px] font-mono text-rose-100 uppercase tracking-widest">
+                    {session.participants.length} Crew Member(s) Onboard
+                  </span>
+                </div>
+
+                {session.participants.includes(profile?.uid || '') ? (
+                  <button 
+                    onClick={endSession}
+                    disabled={loading}
+                    className="w-full py-3 border border-red-500/30 text-red-400/80 rounded-xl text-xs uppercase font-bold hover:bg-red-500/5 transition-all disabled:opacity-50"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Abort Mission'}
+                  </button>
+                ) : (
+                  <button 
+                    onClick={joinSession}
+                    disabled={loading}
+                    className="w-full py-3 bg-rose-500 text-white rounded-xl text-xs uppercase font-bold hover:bg-rose-600 transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Join Mission'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -2108,7 +2215,13 @@ function NuclearOliveTree() {
   );
 }
 
-function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | null, vessel: Vessel | null, onSettingsClick: () => void }) {
+function Header({ profile, vessel, otherPresence, addSR, onSettingsClick }: { 
+  profile: UserProfile | null, 
+  vessel: Vessel | null, 
+  otherPresence: Presence | null,
+  addSR: (amount: number, reason: string) => void,
+  onSettingsClick: () => void 
+}) {
   const sr = vessel?.sr || 0;
   
   let rank = "Interstellar Dust";
@@ -2156,8 +2269,7 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
           transition={{ duration: 1, ease: "easeOut" }}
         />
       </div>
-      
-      <header className="border-b border-white/10 py-2 px-6 flex items-center justify-between max-w-7xl mx-auto w-full bg-black/20 backdrop-blur-sm">
+           <header className="border-b border-white/10 py-2 px-6 flex items-center justify-between max-w-7xl mx-auto w-full bg-black/20 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className={`transition-all duration-1000 ${treeGlow} scale-75 origin-left`}>
             <NuclearOliveTree />
@@ -2170,11 +2282,28 @@ function Header({ profile, vessel, onSettingsClick }: { profile: UserProfile | n
                  profile?.email === 'Haydena.forster@gmail.com' ? 'Commander Hayden' : 
                  profile?.role} // {profile?.role === 'Commander' ? '5' : '6'}
               </p>
+              {otherPresence && (
+                <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-white/10">
+                  <div className={cn(
+                    "w-1 h-1 rounded-full",
+                    (otherPresence.lastSeen?.toDate?.() || new Date()) > new Date(Date.now() - 300000) 
+                      ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" 
+                      : "bg-rose-500/50"
+                  )} />
+                  <span className="text-[8px] font-mono uppercase tracking-widest text-rose-200/60">
+                    Partner { (otherPresence.lastSeen?.toDate?.() || new Date()) > new Date(Date.now() - 300000) ? "Online" : "Offline" }
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-6">
+          {vessel?.members.length === 2 && (
+            <FusionButton profile={profile} addSR={addSR} />
+          )}
+          
           <div className="flex flex-col items-end">
             <span className="text-[9px] font-mono text-rose-200/40 uppercase tracking-tighter">{sr} SR</span>
             <div className="w-16 h-0.5 bg-white/5 rounded-full overflow-hidden">
