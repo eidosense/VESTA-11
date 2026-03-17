@@ -58,7 +58,7 @@ export default function AstronautView({ profile }: { profile: any }) {
     if (facts.length > 0) {
       const interval = setInterval(() => {
         setFeaturedIndex((prev) => (prev + 1) % facts.length);
-      }, 10000);
+      }, 15000);
       return () => clearInterval(interval);
     }
   }, [facts.length]);
@@ -195,7 +195,7 @@ export default function AstronautView({ profile }: { profile: any }) {
               <div className="relative bg-black/60 border border-rose-500/30 rounded-2xl p-8 backdrop-blur-xl">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="px-2 py-1 bg-rose-500 text-white text-[8px] font-mono uppercase tracking-widest rounded">Featured Protocol</div>
-                  <div className="text-[10px] font-mono text-rose-400/60 uppercase tracking-widest">Auto-Rotating every 10s</div>
+                  <div className="text-[10px] font-mono text-rose-400/60 uppercase tracking-widest">Auto-Rotating every 15s</div>
                 </div>
                 <h4 className="text-xl font-bold text-white uppercase mb-4 tracking-tight leading-none">
                   {facts[featuredIndex].title}
@@ -207,7 +207,7 @@ export default function AstronautView({ profile }: { profile: any }) {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <Brain className="w-4 h-4 text-fuchsia-400" />
-                      <span className="text-xs text-fuchsia-300/80 font-medium">{facts[featuredIndex].lifeSkill}</span>
+                      <span className="text-xs text-fuchsia-300/80 font-medium tracking-tight">{facts[featuredIndex].lifeSkill}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Rocket className="w-4 h-4 text-emerald-400" />
@@ -339,7 +339,7 @@ export default function AstronautView({ profile }: { profile: any }) {
                     <div className="space-y-2 pt-4 border-t border-white/5">
                       <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-fuchsia-400">
                         <Brain className="w-3 h-3" />
-                        <span>Neuro-Calibration</span>
+                        <span>Neuro-Strength</span>
                       </div>
                       <p className="text-sm text-fuchsia-100/80 leading-relaxed italic">
                         {fact.lifeSkill}

@@ -1318,7 +1318,7 @@ function DopamineRocketView({ profile, otherPresence }: { profile: UserProfile |
             <Rocket className="w-6 h-6 text-rose-400" />
             Dopamine Rocket
           </h3>
-          <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">ADHD Hyper-focus Calibration</p>
+          <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">Hyper-focus Calibration</p>
         </div>
         
         {session?.active && (
@@ -1600,7 +1600,7 @@ function SyncBreathView({ profile, otherPresence }: { profile: UserProfile | nul
           <Wind className="w-6 h-6 text-rose-400" />
           Sync-Breath
         </h3>
-        <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">ADHD Nervous System Regulation</p>
+        <p className="text-rose-200/40 font-mono text-xs uppercase tracking-widest">Nervous System Regulation</p>
       </div>
 
       <div className="relative flex items-center justify-center">
