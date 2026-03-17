@@ -22,6 +22,7 @@ import {
   doc, 
   setDoc,
   getDoc,
+  getDocs,
   updateDoc,
   deleteDoc,
   limit,
@@ -59,7 +60,8 @@ import {
   Save,
   Sparkles,
   Palette,
-  Leaf
+  Leaf,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -70,7 +72,7 @@ import { analyzeBrainDump, generateFusionPoem, generateFocusMessage, generatePre
 import { getMoonData, getEmotionalDistance, SINGULARITY_SKY, getSkyContext } from './services/astronomyService';
 import { Moon, Sun, Compass, Star } from 'lucide-react';
 
-import AstrontView from './components/AstrontView';
+import AstronautView from './components/AstronautView';
 import TimeWarpView from './components/TimeWarpView';
 import SpaceView from './components/SpaceView';
 import ArtView from './components/ArtView';
@@ -554,7 +556,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [showFusion, setShowFusion] = useState(false);
   const [bgImage, setBgImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astront' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'mission-control' | 'art' | 'thought-stream' | 'archive' | 'focus'>('brain-dump');
+  const [activeTab, setActiveTab] = useState<'brain-dump' | 'astronaut' | 'time-warp' | 'parallax' | 'space' | 'secrets' | 'breath' | 'settings' | 'mission-log' | 'mission-control' | 'art' | 'thought-stream' | 'archive' | 'focus'>('brain-dump');
   const [showMore, setShowMore] = useState(false);
   const [otherPresence, setOtherPresence] = useState<Presence | null>(null);
   const [simulatePartner, setSimulatePartner] = useState(true);
@@ -911,12 +913,12 @@ export default function App() {
                 transition={{ duration: 0.3 }}
                 className={cn(['space', 'brain-dump', 'thought-stream', 'breath', 'focus'].includes(activeTab) ? "h-full flex flex-col" : "min-h-full w-full")}
               >
-                {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} />}
+                {activeTab === 'brain-dump' && <BrainDumpView profile={profile} moonData={moonData} addSR={addSR} updateStreak={updateStreak} otherPresence={otherPresence} activeTab={activeTab} />}
                 {activeTab === 'thought-stream' && profile && (
                   <ThoughtStream vesselId={profile.vesselId || ''} userId={profile.uid} userRole={profile.role} />
                 )}
                 {activeTab === 'space' && <SpaceView />}
-                {activeTab === 'astront' && <AstrontView profile={profile} />}
+                {activeTab === 'astronaut' && <AstronautView profile={profile} />}
                 {activeTab === 'parallax' && <StellarParallaxView profile={profile} otherPresence={otherPresence} moonData={moonData} />}
                 {activeTab === 'art' && <ArtView profile={profile} />}
                 {activeTab === 'time-warp' && <TimeWarpView profile={profile} />}
@@ -1040,12 +1042,12 @@ export default function App() {
             <button
               onClick={() => {
                 audioService.playClick();
-                setActiveTab('astront');
+                setActiveTab('astronaut');
                 setShowMore(false);
               }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all duration-300",
-                activeTab === 'astront' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
+                activeTab === 'astronaut' ? "text-white scale-110" : "text-white/30 hover:text-white/50"
               )}
             >
               <User className="w-5 h-5" />
@@ -2278,9 +2280,7 @@ function Header({ profile, vessel, otherPresence, addSR, onSettingsClick }: {
             <h2 className="text-xs font-bold text-white tracking-tight uppercase italic">VESTA-11</h2>
             <div className="flex items-center gap-2">
               <p className="text-[9px] text-rose-200/60 font-mono uppercase tracking-widest">
-                {profile?.email === 'arya@eidosense.com' ? 'Commander Arya' : 
-                 profile?.email === 'Haydena.forster@gmail.com' ? 'Commander Hayden' : 
-                 profile?.role} // {profile?.role === 'Commander' ? '5' : '6'}
+                {profile?.email === 'arya@eidosense.com' ? 'Commander Arya' : 'Commander Hayden'} // {profile?.role === 'Commander' ? '5' : '6'}
               </p>
               {otherPresence && (
                 <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-white/10">
@@ -2333,7 +2333,7 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }: { profile: UserProfile | null, moonData: any, addSR: (amount: number, reason: string) => void, updateStreak: () => void, otherPresence: Presence | null }) {
+function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence, activeTab }: { profile: UserProfile | null, moonData: any, addSR: (amount: number, reason: string) => void, updateStreak: () => void, otherPresence: Presence | null, activeTab: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -2358,23 +2358,13 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
     return () => unsubscribe();
   }, [profile]);
 
-  const [simulatedTyping, setSimulatedTyping] = useState(false);
-
   useEffect(() => {
-    if (otherPresence?.uid === 'simulated_partner') {
-      const interval = setInterval(() => {
-        if (Math.random() > 0.7) {
-          setSimulatedTyping(true);
-          setTimeout(() => setSimulatedTyping(false), 2000 + Math.random() * 3000);
-        }
-      }, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [otherPresence?.uid]);
+    setPrediction(null);
+  }, [activeTab]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
-  }, [messages, prediction, otherPresence?.typing, simulatedTyping]);
+  }, [messages, prediction, otherPresence?.typing]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -2441,6 +2431,20 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
     }
   };
 
+  const handleClearLog = async () => {
+    if (!profile?.vesselId || !window.confirm("Are you sure you want to clear the communication log? This will delete all messages for both commanders.")) return;
+    
+    try {
+      const q = query(collection(db, 'messages'), where('vesselId', '==', profile.vesselId));
+      const snapshot = await getDocs(q);
+      const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      addSR(10, "Neural Log Purged");
+    } catch (error) {
+      console.error("Failed to clear log:", error);
+    }
+  };
+
   const handlePredictiveAnalysis = async () => {
     if (!profile) return;
     setGeneratingPrediction(true);
@@ -2503,14 +2507,23 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
             </button>
           </div>
           
-          <button
-            onClick={handlePredictiveAnalysis}
-            disabled={generatingPrediction || messages.length < 2}
-            className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 rounded-lg text-indigo-200 text-[10px] font-mono uppercase tracking-widest transition-colors disabled:opacity-50"
-          >
-            {generatingPrediction ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
-            Predictive Analysis
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleClearLog}
+              className="p-2 text-rose-200/40 hover:text-rose-400 transition-colors"
+              title="Clear Communication Log"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handlePredictiveAnalysis}
+              disabled={generatingPrediction || messages.length < 2}
+              className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 rounded-lg text-indigo-200 text-[10px] font-mono uppercase tracking-widest transition-colors disabled:opacity-50"
+            >
+              {generatingPrediction ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
+              Predictive Analysis
+            </button>
+          </div>
         </div>
       </div>
 
@@ -2573,7 +2586,7 @@ function BrainDumpView({ profile, moonData, addSR, updateStreak, otherPresence }
           </div>
         ))}
         
-        {(otherPresence?.typing || simulatedTyping) && (
+        {(otherPresence?.typing) && (
           <div className="flex items-start gap-2">
             <div className="max-w-[80%] p-4 rounded-2xl text-sm bg-black/40 border border-white/10 text-rose-100/80">
               <p className="font-mono text-[10px] uppercase tracking-widest mb-2 opacity-50">

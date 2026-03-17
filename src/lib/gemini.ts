@@ -37,7 +37,7 @@ export async function generateAstronautFacts() {
     2. The scientific fact or recent discovery.
     3. A "Life Skill" or "ADHD Protocol" connecting it to neurodivergent strengths.
     4. A "Motivational Tip" for aspiring astronauts.
-    5. A "Source" (MUST be a full, valid external URL starting with https:// from a reputable scientific source like NASA, ESA, or a scientific journal).
+    5. A "Source" (MUST be a full, valid, direct external URL starting with https:// from a reputable scientific source like NASA, ESA, or a scientific journal. DO NOT use search query URLs. Use direct article or page links).
 
     Format: Return a JSON array of 30 objects. Each object must have:
     - "title": string
