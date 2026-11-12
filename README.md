@@ -1,20 +1,20 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🌌 VESTA-11 — Full-Stack 3D Astronomical & Generative AI Engine
 
-# Run and deploy your AI Studio app
+A full-stack spatial web application combining high-precision astronomical computation, real-time 3D WebGL rendering, and Google Gemini generative AI pipelines.
 
-This contains everything you need to run your app locally.
+### Key Capabilities
+- **Precision Spatial & Astronomical Engine:** Integrates `astronomy-engine` for real-time celestial mechanics and coordinate calculations.
+- **Interactive 3D Visualization:** Renders dynamic, hardware-accelerated 3D scenes directly in the browser using `Three.js` and `React Three Fiber`.
+- **AI Synthesis & Insights:** Connects to Google Gemini (`@google/genai`) to translate complex spatial/astronomical states into structured, context-aware interpretations.
+- **Full-Stack TypeScript Architecture:** Custom `Express` backend bundled with `esbuild`, paired with a `Vite` + `React 19` frontend and `Firebase` integration.
 
-View your app in AI Studio: https://ai.studio/apps/e1c74a8c-3bd7-414c-b23f-7133fa3c3509
+### Tech Stack
+- **Backend & Build:** Node.js, Express, TypeScript, esbuild, Vite 6
+- **AI & Cloud:** Google Gemini SDK (`@google/genai`), Firebase
+- **3D & Computation:** Three.js, React Three Fiber (`@react-three/fiber`, `@react-three/drei`), `astronomy-engine`
+- **UI & Styling:** React 19, Tailwind CSS v4, Motion
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Getting Started
+```bash
+npm install
+npm run dev
